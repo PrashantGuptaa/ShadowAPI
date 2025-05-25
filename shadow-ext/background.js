@@ -29,7 +29,7 @@ async function fetchAndApplyRules() {
 }
 
 // Poll every 60 seconds
-setInterval(fetchAndApplyRules, 60 * 1000);
+setInterval(fetchAndApplyRules, 10 * 1000);
 
 // Fetch once when extension is loaded
 chrome.runtime.onInstalled.addListener(fetchAndApplyRules);
