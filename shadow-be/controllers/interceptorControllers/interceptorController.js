@@ -17,7 +17,7 @@ const getInterceptedRulesController = (req, res) => {
                   }
                 },
                 "condition": {
-                  "urlFilter": "broomees.com",
+                  "urlFilter": "broomees.com/api/categoriesName",
                   "resourceTypes": ["xmlhttprequest"]
                 }
               }
