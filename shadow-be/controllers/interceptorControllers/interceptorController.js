@@ -7,19 +7,20 @@ const getInterceptedRulesController = (req, res) => {
     sendSuccess(res, {
         data: [
             {
-              "id": 101,
-              "priority": 1,
-              "action": {
-                "type": "redirect",
-                "redirect": {
-                  "url": "https://shadow-api-be.vercel.app/cdn/user.json"
+                "id": 9001,
+                "priority": 1,
+                "action": {
+                  "type": "redirect",
+                  "redirect": {
+                    "url": "https://shadow-api-be.vercel.app/cdn/user.json"
+                  }
+                },
+                "condition": {
+                  "urlFilter": "jsonplaceholder.typicode.com/todos/1",
+                  "resourceTypes": ["xmlhttprequest"]
                 }
-              },
-              "condition": {
-                "urlFilter": "jsonplaceholder.typicode.com",
-                "resourceTypes": ["xmlhttprequest"]
               }
-            }
+              
           ]
 
     })
