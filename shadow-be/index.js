@@ -10,11 +10,12 @@ const app = express();
 
 // middlewares
 app.use(cors({
-  origin: '*', // or a specific list like ['chrome-extension://<your-extension-id>']
+  origin: ['chrome-extension://dlcipodmgiobpodkhmhankckldndkhfk'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   exposedHeaders: ['Content-Type'],
 }));
+
 app.use(testMiddleware);
 app.use('/api/v1', routes);
 
