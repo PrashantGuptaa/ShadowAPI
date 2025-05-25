@@ -8,6 +8,9 @@
     "declarativeNetRequestWithHostAccess",
     "storage"
   ],
+  "optional_permissions": [
+    "declarativeNetRequest"
+  ],  
   "host_permissions": [
     "http://localhost:3210/*",
     "https://utilapi.geeksforgeeks.org/*",
