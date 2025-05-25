@@ -12,7 +12,7 @@ const getInterceptedRulesController = (req, res) => {
                 "action": {
                   "type": "redirect",
                   "redirect": {
-                    "url": "https://shadow-api-be.vercel.app/cdn/user.json"
+                    "url": "https://shadow-api.vercel.app/cdn/user.json"
                   }
                 },
                 "condition": {
