@@ -1,0 +1,14 @@
+{
+    "is_logged_in": true,
+    "user_name": "danger",
+    "csrf_token": "f953299b105595634426743c0ff2a0930b1c3ef0d72bf29fe5befd748b2bef63",
+    "ut_csrf_token": "2cf01a115f6c85b295566081097d4ce65b8269ee10ec9f1b824a3a9207711c80",
+    "eidentifier": "3gmeSN8w0CWCKZ2nfsB6T+phfNd9jmpy4PdrhAQ8hFs/+pQ=",
+    "time": "23:38:28",
+    "payload": {},
+    "country_name": "USA",
+    "country_code": "US",
+    "region_code": "NY",
+    "region_name": "Uttar Pradesh",
+    "city_name": "Lucknow"
+}
