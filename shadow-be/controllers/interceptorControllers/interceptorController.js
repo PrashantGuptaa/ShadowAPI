@@ -15,7 +15,7 @@ const getInterceptedRulesController = (req, res) => {
                 }
             },
             "condition": {
-                "urlFilter": "https://utilapi.geeksforgeeks.org/api/user/profile",
+                "urlFilter": "https://utilapi.geeksforgeeks.org/api/user/profile/",
                 "resourceTypes": ["xmlhttprequest"]
             }
         }]

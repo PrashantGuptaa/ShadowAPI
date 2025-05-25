@@ -20,6 +20,9 @@ async function fetchAndApplyRules() {
         }
       }
     );
+    chrome.declarativeNetRequest.getDynamicRules((rules) => {
+      console.log('Loaded rules:', rules);
+    });
   } catch (e) {
     console.error('Failed to fetch mock rules:', e);
   }
