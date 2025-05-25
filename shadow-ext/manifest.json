@@ -13,8 +13,10 @@
   ],  
   "host_permissions": [
     "http://localhost:3210/*",
+    "https://jsonplaceholder.typicode.com/*",
     "https://utilapi.geeksforgeeks.org/*",
-    "https://shadow-api-be.vercel.app/*"
+    "https://shadow-api-be.vercel.app/*",
+    "https://www.geeksforgeeks.org/*"
   ],
   "background": {
     "service_worker": "background.js"
