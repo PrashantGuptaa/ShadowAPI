@@ -17,7 +17,8 @@
     "https://utilapi.geeksforgeeks.org/*",
     "https://shadow-api-be.vercel.app/*",
     "https://www.geeksforgeeks.org/*",
-    "https://www.teamblind.com/*"
+    "https://www.teamblind.com/*",
+    "https://broomees.com/*"
   ],
   "background": {
     "service_worker": "background.js"

@@ -12,11 +12,12 @@ const getInterceptedRulesController = (req, res) => {
                 "action": {
                   "type": "redirect",
                   "redirect": {
-                    "url": "https://shadow-api.vercel.app/cdn/user.json"
+                    "url": "https://shadow-api.vercel.app/cdn/broomies.json",
+                    // "url": "http://localhost:3210/cdn/user.json"
                   }
                 },
                 "condition": {
-                  "urlFilter": "www.teamblind.com",
+                  "urlFilter": "broomees.com",
                   "resourceTypes": ["xmlhttprequest"]
                 }
               }
