@@ -5,20 +5,22 @@ const {
 
 const getInterceptedRulesController = (req, res) => {
     sendSuccess(res, {
-        data: [{
-            "id": 101,
-            "priority": 1,
-            "action": {
+        data: [
+            {
+              "id": 101,
+              "priority": 1,
+              "action": {
                 "type": "redirect",
                 "redirect": {
-                    "url": "https://shadow-api-be.vercel.app/cdn/user.json"
+                  "url": "https://shadow-api-be.vercel.app/cdn/user.json"
                 }
-            },
-            "condition": {
-                "urlFilter": "https://utilapi.geeksforgeeks.org/api/user/profile/",
+              },
+              "condition": {
+                "urlFilter": "https://utilapi.geeksforgeeks.org/api/user/profile",
                 "resourceTypes": ["xmlhttprequest"]
+              }
             }
-        }]
+          ]
 
     })
 }
