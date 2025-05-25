@@ -16,7 +16,7 @@ const getInterceptedRulesController = (req, res) => {
                 }
               },
               "condition": {
-                "urlFilter": "/api/user/profile",
+                "urlFilter": "https://jsonplaceholder.typicode.com/todos/1",
                 "resourceTypes": ["xmlhttprequest"]
               }
             }
