@@ -9,12 +9,7 @@ const routes = require('./routes');
 const app = express();
 
 // middlewares
-app.use(cors({
-  origin: ['chrome-extension://dlcipodmgiobpodkhmhankckldndkhfk'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  exposedHeaders: ['Content-Type'],
-}));
+app.use(cors());
 
 app.use(testMiddleware);
 app.use('/api/v1', routes);
