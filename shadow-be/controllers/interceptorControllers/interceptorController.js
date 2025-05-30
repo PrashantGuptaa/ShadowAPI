@@ -5,25 +5,18 @@ const {
 
 const getInterceptedRulesController = (req, res) => {
     sendSuccess(res, {
-        data: [
-            {
-                "id": 9001,
-                "priority": 1,
-                "action": {
-                  "type": "redirect",
-                  "redirect": {
-                    "url": "https://shadow-api.vercel.app/cdn/broomies.json",
-                    // "url": "http://localhost:3210/cdn/user.json"
-                  }
-                },
-                "condition": {
-                  "urlFilter": "broomees.com/api/categoriesName",
-                  "resourceTypes": ["xmlhttprequest"]
-                }
-              }
-              
-          ]
-
+        data: [{
+            "id": 101,
+            "priority": 1,
+            "action": {
+                "type": "mock",
+                "mockResponseUrl": "https://shadow-api.vercel.app/cdn/custom.json"
+            },
+            "match": {
+                "urlContains": "jsonplaceholder.typicode.com/posts",
+                "method": "POST"
+            }
+        }]
     })
 }
 

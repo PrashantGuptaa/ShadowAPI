@@ -1,12 +1,12 @@
 async function fetchAndApplyRules() {
   try {
-    const res = await fetch('http://localhost:3210/api/v1/interceptor/data'); // use auth token or ID if needed
+    const res = await fetch('http://localhost:3210/api/v1/interceptor/data');
     const result = await res.json();
-    console.log("Result", result)
     const rulesFromServer = result?.data?.data || [];
-    console.info("Rules", rulesFromServer)
+
     const ruleIds = rulesFromServer.map(r => r.id);
 
+    // 1. Update DNR rules (for GET)
     chrome.declarativeNetRequest.updateDynamicRules(
       {
         removeRuleIds: ruleIds,
@@ -20,21 +20,28 @@ async function fetchAndApplyRules() {
         }
       }
     );
+
+    // 2. Save rules for injected fetch script to use (for POST/GraphQL/etc.)
+    chrome.storage.local.set({ rules: rulesFromServer }, () => {
+      console.log("Rules also saved to storage for fetch injection.");
+    });
+
+    // 3. Optional: log current rules
     chrome.declarativeNetRequest.getDynamicRules((rules) => {
       console.log('Loaded rules:', rules);
     });
+
   } catch (e) {
     console.error('Failed to fetch mock rules:', e);
   }
 }
 
-// Poll every 60 seconds
-setInterval(fetchAndApplyRules, 10 * 1000);
+// Poll every 10 seconds
+setInterval(fetchAndApplyRules, 30 * 1000);
 
-// Fetch once when extension is loaded
+// Fetch once on install and startup
 chrome.runtime.onInstalled.addListener(fetchAndApplyRules);
 chrome.runtime.onStartup.addListener(fetchAndApplyRules);
-
 
 // chrome.runtime.onInstalled.addListener(() => {
 //     const rules = [
