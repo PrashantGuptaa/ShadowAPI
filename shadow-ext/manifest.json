@@ -5,21 +5,12 @@
   "description": "Intercept and mock specific API requests.",
   "permissions": [
     "scripting",
-    "declarativeNetRequest",
-    "declarativeNetRequestWithHostAccess",
     "storage"
   ],
-  "optional_permissions": [
-    "declarativeNetRequest"
-  ],  
   "host_permissions": [
     "http://localhost:3210/*",
     "https://jsonplaceholder.typicode.com/*",
-    "https://utilapi.geeksforgeeks.org/*",
-    "https://shadow-api-be.vercel.app/*",
-    "https://www.geeksforgeeks.org/*",
-    "https://www.teamblind.com/*",
-    "https://broomees.com/*"
+    "https://shadow-api-be.vercel.app/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -48,7 +39,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["mock/*.json"],
+      "resources": ["injectedFetch.actual.js"],
       "matches": ["<all_urls>"]
     }
   ]
