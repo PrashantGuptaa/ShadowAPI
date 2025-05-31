@@ -1,7 +1,7 @@
 const {
     sendSuccess,
     sendError
-} = require("../../utils/response")
+} = require("../utils/response")
 
 const getInterceptedRulesController = (req, res) => {
     sendSuccess(res, {

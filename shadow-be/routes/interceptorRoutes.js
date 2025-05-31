@@ -1,5 +1,5 @@
 const express = require('express');
-const { getInterceptedRulesController, getMockDataController } = require('../controllers/interceptorControllers/interceptorController');
+const { getInterceptedRulesController, getMockDataController } = require('../controllers/interceptorController');
 const interceptorRoutes = express.Router();
 
 

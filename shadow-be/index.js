@@ -1,23 +1,36 @@
-const express = require('express');
-const { createProxyMiddleware } = require('http-proxy-middleware');
-require('dotenv').config();
-const cors = require('cors');
-const path = require('path');
-const testMiddleware = require('./middlewares');
-const routes = require('./routes');
+const express = require("express");
+require("dotenv").config();
+const cors = require("cors");
+const path = require("path");
+const mongoose = require("mongoose");
+
+const requestTrackingMiddleware = require("./middlewares");
+const routes = require("./routes");
 
 const app = express();
 
 // middlewares
+// add body parser middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+// add request tracking middleware  
+app.use(requestTrackingMiddleware);
+app.use("/api/v1", routes);
 
-app.use(testMiddleware);
-app.use('/api/v1', routes);
+
 
 // Serve static files from /mock-json under the /cdn route
-app.use('/cdn', express.static(path.join(__dirname, 'public', 'cdn')));
+app.use("/cdn", express.static(path.join(__dirname, "public", "cdn")));
 
-app.get('/', (req, res) => res.status(200).json({message:"Welcome boss"}))
+app.get("/", (req, res) => res.status(200).json({ message: "Welcome boss" }));
 
 const PORT = process.env.PORT || 3210;
-app.listen(PORT, () => console.log(`App running on ${PORT}`))
+
+mongoose
+  .connect(process.env.SHADOW_DB_URL)
+  .then(() => {
+    console.log("MongoDB connected successfully");
+    app.listen(PORT, () => console.log(`App running on ${PORT}`));
+  })
+  .catch((err) => console.error("MongoDB connection error:", err));

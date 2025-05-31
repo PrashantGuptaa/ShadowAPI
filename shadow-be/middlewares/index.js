@@ -1,4 +1,4 @@
-const testMiddleware = (req, res, next) => {
+const requestTrackingMiddleware = (req, res, next) => {
     try {
         console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
@@ -7,4 +7,4 @@ const testMiddleware = (req, res, next) => {
     }
 }
 
-module.exports = testMiddleware;
+module.exports = requestTrackingMiddleware;
