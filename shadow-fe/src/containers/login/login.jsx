@@ -6,26 +6,44 @@ import {
   Input,
   Button,
   Link as ChakraLink,
-  Field,
+  // Field,
   Stack,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router";
+import InputWithLabel from "../../components/InputWithLabel/inputWithLabel";
+import { isValidEmail, isValidPassword } from "../../utils/validationUtils";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({});
+  const toast = useToast();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // Here you would typically handle the login logic, e.g., API call
     console.log("Email:", email);
     console.log("Password:", password);
-
-    toaster.create({
-      description: "File saved successfully",
-      type: "info",
-    });
+    const updatedErrors = {};
+    if (!isValidEmail(email)) {
+      updatedErrors.email = true;
+    }
+    if (!isValidPassword(password)) {
+      updatedErrors.password = true;
+    }
+    setErrors(updatedErrors);
+    if (Object.keys(updatedErrors).length > 0) {
+      toast({
+        title: "Make sure your email and password are valid.",
+        position: "top",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
   };
   return (
     <Flex
@@ -33,24 +51,48 @@ export default function LoginPage() {
       width="100vw"
       // alignItems="center"
       justifyContent="flex-end"
-      bgImage="url('/assets/login.jpg')"
+      bgImage="url('/assets/login2.png')"
       bgSize="cover"
       bgPosition="center"
     >
       <Box
-        bg="whiteAlpha.900"
         p={8}
         rounded="md"
         shadow="xl"
         maxW="400px"
         w="100%"
+        bg="brand.surface"
       >
-        <Heading textAlign="center" mb={6} size="lg" color="teal.600">
+        <Heading textAlign="center" mb={6} size="lg">
           Welcome Back
         </Heading>
         <form>
           <Stack spacing={4}>
-            <Field.Root required>
+            <InputWithLabel
+              label="Email"
+              name="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              isRequired
+              helperText="We'll never share your email."
+              isInvalid={isValidEmail(email) || errors.email}
+              error="Please enter a valid email address."
+            />
+            <InputWithLabel
+              label="Password"
+              name="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              isRequired
+              helperText="Password must be 8+ characters, include uppercase, lowercase, number & special character."
+              isInvalid={isValidPassword(password) || errors.password}
+              error="Password must be at least 8 characters long."
+            />
+            {/* <Field.Root required>
               <Field.Label>
                 Email <Field.RequiredIndicator />
               </Field.Label>
@@ -73,31 +115,21 @@ export default function LoginPage() {
                 Password must be 8+ characters, include uppercase, lowercase,
                 number & special character.
               </Field.HelperText>
-            </Field.Root>
+            </Field.Root> */}
             <Flex justify="flex-end">
-              <ChakraLink color="teal.500" fontSize="sm">
-                Forgot password?
-              </ChakraLink>
+              <ChakraLink fontSize="sm">Forgot password?</ChakraLink>
             </Flex>
             <Button
-              colorPalette="teal"
               variant="outline"
               type="submit"
               width="full"
-              bg={"teal.500"}
-              color="white"
               onClick={handleSubmit}
             >
               Login
             </Button>
             <Text fontSize="sm">
               Don't have an account?{" "}
-              <ChakraLink
-                as={RouterLink}
-                to="/register"
-                color="blue.500"
-                fontWeight="medium"
-              >
+              <ChakraLink as={RouterLink} to="/register" fontWeight="medium">
                 Register
               </ChakraLink>
             </Text>

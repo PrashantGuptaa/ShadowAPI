@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
-const User = require("../models/user");
+const User = require("../models/userModel");
 const {
   uniqueNamesGenerator,
   adjectives,
@@ -59,14 +59,19 @@ const registerUserService = async (userData) => {
   };
   try {
     const user = new User(newUser);
-    const { _id, id } = await user.save();
-    console.info("User registered successfully:", _id, id, user, user.email);
-    const token = jwt.sign({ _id, id }, process.env.USER_JWT_SECRET, {
+    const { _id, userId } = await user.save();
+    console.info(
+      "User registered successfully:",
+      _id,
+      userId,
+      user.email
+    );
+    const token = jwt.sign({ _id, userId }, process.env.USER_JWT_SECRET, {
       expiresIn: "1h", // optional
     });
     // Send verification email
     await sendVerificationEmailService(email);
-    return { token, email, name, userName, id, _id };
+    return { token, email, name, userName, userId, _id };
   } catch (error) {
     throw new Error("Error registering user: " + error.message);
   }
@@ -98,9 +103,9 @@ const loginUserService = async (email, password) => {
     throw new Error("Invalid password");
   }
   // If the user exists and the password is valid, return the user data
-  const { name, role, userId, id, userName, _id } = user[0] || {};
+  const { name, role, userId, userName, _id } = user[0] || {};
   console.info("User logged in successfully:", email);
-  const token = jwt.sign({ _id, id }, process.env.USER_JWT_SECRET, {
+  const token = jwt.sign({ _id, userId }, process.env.USER_JWT_SECRET, {
     expiresIn: "1h", // optional
   });
   return {
@@ -108,7 +113,7 @@ const loginUserService = async (email, password) => {
     email,
     name,
     role,
-    id,
+    userId,
     userName,
     _id,
   };
@@ -136,12 +141,12 @@ const sendVerificationEmailService = async (email) => {
   const lastSentTime = userExists.verificationEmailLastSent
     ? moment(userExists.verificationEmailLastSent).toDate()
     : null;
-    console.info(
-      "Last sent time for verification email:",
-      lastSentTime,
-      "Current time:",
-      currentTime
-    );
+  console.info(
+    "Last sent time for verification email:",
+    lastSentTime,
+    "Current time:",
+    currentTime
+  );
   if (
     lastSentTime &&
     currentTime - lastSentTime < 10 * 60 * 1000 // 10 minutes in milliseconds

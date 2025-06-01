@@ -2,7 +2,9 @@ import { useState } from "react";
 import "./App.css";
 import axios from "axios";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
-import LoginPage from "./containers/login/login";
+import LoginPage from "./containers/login";
+import AppHeader from "./components/AppHeader";
+import Dashboard from "./containers/dashboard";
 
 function App() {
   const [response, setResponse] = useState(null);
@@ -46,8 +48,10 @@ function App() {
 
   return (
     <BrowserRouter>
+      <AppHeader />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path='/dashboard' element={<Dashboard />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

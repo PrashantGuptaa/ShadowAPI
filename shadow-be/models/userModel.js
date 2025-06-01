@@ -4,7 +4,7 @@ const { Schema, model } = mongoose;
 
 const userSchema = new Schema(
   {
-    id: {
+    userId: {
       type: Number,
       unique: true,
       // required: true,
@@ -89,7 +89,7 @@ const userSchema = new Schema(
   }
 );
 
-userSchema.plugin(AutoIncrement, { inc_field: "id" });
+userSchema.plugin(AutoIncrement, { inc_field: "userId" });
 
 const User = model("User", userSchema);
 module.exports = User;

@@ -1,6 +1,6 @@
 // this will handle the user related operations
 
-const User = require("../models/user");
+const User = require("../models/userModel");
 
 const { sendSuccess, sendError } = require("../utils/response");
 const {
@@ -61,7 +61,7 @@ const registerUserController = async (req, res) => {
 
 const loginUserController = async (req, res) => {
   try {
-      console.info("Login attempt with body:", req.body);
+    console.info("Login attempt with body:", req.body);
     const { email, password } = req.body;
     const user = await loginUserService(email, password);
     sendSuccess(res, {
