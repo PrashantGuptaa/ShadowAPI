@@ -1,6 +1,8 @@
 import { useState } from "react";
 import "./App.css";
 import axios from "axios";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router";
+import LoginPage from "./containers/login/login";
 
 function App() {
   const [response, setResponse] = useState(null);
@@ -38,24 +40,17 @@ function App() {
       .then((data) => {
         console.log("Fetch Response:", data);
         setFetchResponse(data);
-    })
+      })
       .catch((error) => console.error("Fetch Error:", error));
   };
 
   return (
-    <div>
-      <button onClick={handlePost}>Send POST Request</button>
-      <pre>
-        {response ? JSON.stringify(response, null, 2) : "No response yet"}
-      <div>
-        <pre>
-
-          {fetchResponse ? JSON.stringify(fetchResponse, null, 2) : "No fetch response yet"}
-        </pre>
-        </div>
-
-      </pre>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
