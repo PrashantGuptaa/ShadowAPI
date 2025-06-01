@@ -76,6 +76,12 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    verificationEmailLastSent: {
+      type: Date,
+    },
+    verificationPhoneLastSent: {
+      type: Date,
+    },
   },
   {
     timestamps: true,

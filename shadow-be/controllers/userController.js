@@ -6,6 +6,7 @@ const { sendSuccess, sendError } = require("../utils/response");
 const {
   registerUserService,
   loginUserService,
+  verifyEmailService,
 } = require("../services/userService");
 
 const getUserController = async (req, res) => {
@@ -76,8 +77,26 @@ const loginUserController = async (req, res) => {
   }
 };
 
+const verifyUserEmailController = async (req, res) => {
+  try {
+    const { token } = req.query;
+    await verifyEmailService(token);
+    sendSuccess(res, {
+      message: "User email verified successfully",
+      statusCode: 200,
+    });
+  } catch (err) {
+    sendError(res, {
+      message: "Error verifying user email",
+      err,
+      statusCode: 500,
+    });
+  }
+};
+
 module.exports = {
   getUserController,
   registerUserController,
   loginUserController,
+  verifyUserEmailController,
 };
