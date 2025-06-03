@@ -60,6 +60,7 @@ export default function LoginPage() {
         rounded="md"
         shadow="xl"
         maxW="400px"
+        borderRadius="0"
         w="100%"
         bg="brand.surface"
       >
@@ -77,7 +78,7 @@ export default function LoginPage() {
               placeholder="Enter your email"
               isRequired
               helperText="We'll never share your email."
-              isInvalid={isValidEmail(email) || errors.email}
+              isInvalid={!isValidEmail(email) || errors.email}
               error="Please enter a valid email address."
             />
             <InputWithLabel
@@ -89,33 +90,9 @@ export default function LoginPage() {
               placeholder="Enter your password"
               isRequired
               helperText="Password must be 8+ characters, include uppercase, lowercase, number & special character."
-              isInvalid={isValidPassword(password) || errors.password}
+              isInvalid={!isValidPassword(password) || errors.password}
               error="Password must be at least 8 characters long."
             />
-            {/* <Field.Root required>
-              <Field.Label>
-                Email <Field.RequiredIndicator />
-              </Field.Label>
-              <Input
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </Field.Root>
-            <Field.Root required>
-              <Field.Label>
-                Email <Field.RequiredIndicator />
-              </Field.Label>
-              <Input
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <Field.HelperText>
-                Password must be 8+ characters, include uppercase, lowercase,
-                number & special character.
-              </Field.HelperText>
-            </Field.Root> */}
             <Flex justify="flex-end">
               <ChakraLink fontSize="sm">Forgot password?</ChakraLink>
             </Flex>

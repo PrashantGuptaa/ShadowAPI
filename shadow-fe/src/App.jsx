@@ -5,6 +5,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import LoginPage from "./containers/login";
 import AppHeader from "./components/AppHeader";
 import Dashboard from "./containers/dashboard";
+import EmailVerification from "./containers/emailVerification";
+import Register from "./containers/register";
 
 function App() {
   const [response, setResponse] = useState(null);
@@ -51,7 +53,10 @@ function App() {
       <AppHeader />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path='/dashboard' element={<Dashboard />} />
+        <Route path="/register" element={<Register />} />
+
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/verify-email" element={<EmailVerification />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

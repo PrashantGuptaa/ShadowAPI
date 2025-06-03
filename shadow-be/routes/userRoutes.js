@@ -5,6 +5,6 @@ const userRoutes = express.Router();
 
 userRoutes.post("/login", loginUserController);
 userRoutes.post("/register", registerUserController);
-userRoutes.patch("/verify-email", verifyUserEmailController)
+userRoutes.put("/verify-email", verifyUserEmailController)
 
 module.exports = userRoutes;

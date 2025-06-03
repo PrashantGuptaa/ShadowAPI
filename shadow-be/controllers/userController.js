@@ -79,7 +79,7 @@ const loginUserController = async (req, res) => {
 
 const verifyUserEmailController = async (req, res) => {
   try {
-    const { token } = req.query;
+    const { token } = req.body;
     await verifyEmailService(token);
     sendSuccess(res, {
       message: "User email verified successfully",

@@ -17,28 +17,38 @@ import logo from "../../assets/shadowGolden.png";
 
 const AppHeader = () => {
   return (
-    <Box px={6} py={3} boxShadow="sm">
-      <Flex align="center">
-        {/* Logo and App Name */}
-        <Flex align="center" gap={3}>
-          <Image src={logo} alt="App Logo" boxSize="40px" />
-          <Heading size="md">ShadowAPI</Heading>
-        </Flex>
+    <div style={{ width: "100%", position: "sticky", top: 0, zIndex: 10000 }}>
+      <Box
+        as="header"
+        px={6}
+        py={3}
+        boxShadow="inner"
+        position="sticky"
+        top={0}
+        zIndex={10000}
+      >
+        <Flex align="center">
+          {/* Logo and App Name */}
+          <Flex align="center" gap={3}>
+            <Image src={logo} alt="App Logo" boxSize="40px" />
+            <Heading size="md">ShadowAPI</Heading>
+          </Flex>
 
-        <Spacer />
-        <Menu>
-          <MenuButton rightIcon={<FaUserCircle />}>
+          <Spacer />
+          <Menu>
+            {/* <MenuButton> */}
             <IconButton borderRadius={"full"} aria-label="Search database">
               <FaUserCircle />
             </IconButton>
-          </MenuButton>
-          <MenuList>
-            <MenuItem value="profile">Profile</MenuItem>
-            <MenuItem value="sign-out">Sign out</MenuItem>
-          </MenuList>
-        </Menu>
-      </Flex>
-    </Box>
+            {/* </MenuButton> */}
+            <MenuList>
+              <MenuItem value="profile">Profile</MenuItem>
+              <MenuItem value="sign-out">Sign out</MenuItem>
+            </MenuList>
+          </Menu>
+        </Flex>
+      </Box>
+    </div>
   );
 };
 

@@ -1,5 +1,5 @@
 const express = require("express");
-const { validateUser } = require("../middlewares/userMW");
+const { validateUser } = require("../middlewares/userMiddleware");
 const { fetchRulesController } = require("../controllers/ruleController");
 
 const ruleRoutes = express.Router();

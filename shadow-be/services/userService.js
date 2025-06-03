@@ -60,12 +60,7 @@ const registerUserService = async (userData) => {
   try {
     const user = new User(newUser);
     const { _id, userId } = await user.save();
-    console.info(
-      "User registered successfully:",
-      _id,
-      userId,
-      user.email
-    );
+    console.info("User registered successfully:", _id, userId, user.email);
     const token = jwt.sign({ _id, userId }, process.env.USER_JWT_SECRET, {
       expiresIn: "1h", // optional
     });
@@ -166,7 +161,7 @@ const sendVerificationEmailService = async (email) => {
     expiresIn: "10m",
   });
 
-  const verificationUrl = `${process.env.FE_APP_URL}/verify-email?token=${token}`;
+  const verificationUrl = `${process.env.FE_APP_URL}verify-email?token=${token}`;
   console.info("Verification URL:", verificationUrl);
   const mailOptions = {
     from: process.env.EMAIL_USER,
@@ -191,7 +186,7 @@ const verifyEmailService = async (token) => {
     throw new Error("Token is required for email verification");
   }
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.USER_JWT_SECRET);
     // check if the token has expired
     if (!decoded || !decoded?.email) {
       throw new Error("Invalid token");
@@ -221,6 +216,7 @@ const verifyEmailService = async (token) => {
     console.info("Email verified successfully for user:", user.email);
     return user;
   } catch (error) {
+    console.error("Error verifying email:", error);
     throw new Error("Invalid or expired token");
   }
 };

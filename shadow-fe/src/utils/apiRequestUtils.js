@@ -7,6 +7,7 @@ class ApiRequestUtils {
         params: params,
         headers: {
           "Content-Type": "application/json",
+          'Auth-Token': localStorage.getItem("authToken") || "",
           ...headers,
         },
       });
@@ -21,6 +22,7 @@ class ApiRequestUtils {
       const response = await axios.post(url, data, {
         headers: {
           "Content-Type": "application/json",
+          'Auth-Token': localStorage.getItem("authToken") || "",
           ...headers,
         },
       });
@@ -35,6 +37,7 @@ class ApiRequestUtils {
       const response = await axios.put(url, data, {
         headers: {
           "Content-Type": "application/json",
+          'Auth-Token': localStorage.getItem("authToken") || "",
           ...headers,
         },
       });
@@ -50,6 +53,7 @@ class ApiRequestUtils {
         params: params,
         headers: {
           "Content-Type": "application/json",
+          'Auth-Token': localStorage.getItem("authToken") || "",
           ...headers,
         },
       });
