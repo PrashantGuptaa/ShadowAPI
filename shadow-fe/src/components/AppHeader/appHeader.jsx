@@ -36,11 +36,9 @@ const AppHeader = () => {
 
           <Spacer />
           <Menu>
-            {/* <MenuButton> */}
             <IconButton borderRadius={"full"} aria-label="Search database">
               <FaUserCircle />
             </IconButton>
-            {/* </MenuButton> */}
             <MenuList>
               <MenuItem value="profile">Profile</MenuItem>
               <MenuItem value="sign-out">Sign out</MenuItem>

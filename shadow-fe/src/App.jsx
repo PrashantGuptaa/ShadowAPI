@@ -7,6 +7,7 @@ import AppHeader from "./components/AppHeader";
 import Dashboard from "./containers/dashboard";
 import EmailVerification from "./containers/emailVerification";
 import Register from "./containers/register";
+import RuleConfig from "./containers/ruleConfig";
 
 function App() {
   const [response, setResponse] = useState(null);
@@ -56,6 +57,7 @@ function App() {
         <Route path="/register" element={<Register />} />
 
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/rule-config" element={<RuleConfig />} />
         <Route path="/verify-email" element={<EmailVerification />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

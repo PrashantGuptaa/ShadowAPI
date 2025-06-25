@@ -17,6 +17,7 @@ export const charcoalGoldenTheme = extendTheme({
       primary: "#FFC857", // Golden Amber
       hover: "#2C2C2C", // Hover states
       text: "#F5F5F5", // Text
+      danger: "#FF6B6B",
       // heading: "#FFC857", // Headings
     },
   },
@@ -63,6 +64,7 @@ export const charcoalGoldenTheme = extendTheme({
         },
       },
     },
+  
     Link: {
       baseStyle: {
         color: "#FFC857",
