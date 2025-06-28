@@ -51,26 +51,14 @@
           body
         );
         let bodyMatch = false;
-        if (method === "GET") {
+        if (method === "GET" || method === "DELETE" || !body) {
           // For GET requests, we don't check the body
           bodyMatch = true;
-        } else if (method !== "GET" && !body) {
-          // If the method is not GET and there's no body, we assume it doesn't match
-          bodyMatch = false;
-        } else if (method !== "GET" && body && !hasPayload) {
-          // If the method is not GET and there's a body but no payload, we assume it doesn't match
-          bodyMatch = false;
-        } else if (method !== "GET" && hasPayload && !body) {
-          // If the method is not GET and there's a payload but no body, we assume it doesn't match
-          bodyMatch = false;
         }
         if (method !== "GET" && hasPayload) {
-          console.log("F-2 Fetch hasPayload and body:", hasPayload, body);
           try {
             if (body && rulePayload && rulePayload.length > 0) {
               const parsedBody = JSON.parse(body);
-              console.log("Parsed body:", parsedBody);
-              console.log("Rule payload:", rulePayload);
 
               // loop through rulePayload and check if all of the payloads data is present in the body
               bodyMatch = rulePayload.every((rule) => {
@@ -98,16 +86,6 @@
             bodyMatch = false; // If there's an error, we assume the body doesn't match
           }
         }
-
-        console.log(
-          "[ShadowAPI] rule match result for url",
-          url,
-          ruleUrl,
-          "url, method, body match",
-          urlMatch,
-          methodMatch,
-          bodyMatch
-        );
 
         if (urlMatch && methodMatch && bodyMatch) {
           console.log("[ShadowAPI] Mocking fetch for", url);
