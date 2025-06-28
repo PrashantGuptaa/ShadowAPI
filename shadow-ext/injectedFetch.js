@@ -18,9 +18,8 @@
   function overrideFetchAndXHR(rules = []) {
     console.log("[ShadowAPI] Page context fetch override running", rules);
 
-    // const rules = `${JSON.stringify(rulesFromServer)}`;
-
     const originalFetch = window.fetch;
+    // Fetch block
     window.fetch = async function (input, init = {}) {
       console.log("[ShadowAPI] Mocked fetch function called", rules);
       const url = typeof input === "string" ? input : input.url;
@@ -29,65 +28,9 @@
       console.log("F-2 Fetch url and body:", url, body);
 
       for (const rule of rules) {
-        const {
-          match = "",
-          payload: rulePayload = {},
-          url: ruleUrl = "",
-          method: ruleMethod = "",
-        } = rule;
-        const hasPayload = rulePayload && rulePayload.length > 0;
-        const urlMatch =
-          match === "PARTIAL_MATCH"
-            ? url.includes(ruleUrl || "")
-            : ruleUrl === url;
-        const methodMatch = !rule.method || method === ruleMethod.toUpperCase();
-        console.log(
-          "F-3 Payload and body",
-          typeof rulePayload,
-          typeof body,
-          method,
-          hasPayload,
-          rulePayload,
-          body
-        );
-        let bodyMatch = false;
-        if (method === "GET" || method === "DELETE" || !body) {
-          // For GET requests, we don't check the body
-          bodyMatch = true;
-        }
-        if (method !== "GET" && hasPayload) {
-          try {
-            if (body && rulePayload && rulePayload.length > 0) {
-              const parsedBody = JSON.parse(body);
+        const ruleMatched = matchRule(url, method, body, rule);
 
-              // loop through rulePayload and check if all of the payloads data is present in the body
-              bodyMatch = rulePayload.every((rule) => {
-                if (rule.matcher === "Equals") {
-                  return parsedBody[rule.key] === rule.value;
-                }
-                if (rule.matcher === "Not Equals") {
-                  return parsedBody[rule.key] !== rule.value;
-                }
-                if (rule.matcher === "Contains") {
-                  return (
-                    parsedBody[rule.key] &&
-                    parsedBody[rule.key]?.toString()?.includes(rule.value)
-                  );
-                }
-                return false; // if no matcher is found, return false
-              });
-              console.log("Body match result:", bodyMatch);
-            }
-          } catch (error) {
-            console.error(
-              "Error parsing body or checking payload match:",
-              error
-            );
-            bodyMatch = false; // If there's an error, we assume the body doesn't match
-          }
-        }
-
-        if (urlMatch && methodMatch && bodyMatch) {
+        if (ruleMatched) {
           console.log("[ShadowAPI] Mocking fetch for", url);
           const { response } = rule;
           if (response) {
@@ -115,6 +58,7 @@
       return originalFetch(input, init);
     };
 
+    // xhr block
     const OriginalXHR = window.XMLHttpRequest;
     function MockedXHR() {
       console.log("[ShadowAPI] MockedXHR constructor called");
@@ -131,58 +75,12 @@
         console.log("[ShadowAPI] MockedXHR send function called");
         const url = this._url;
         const method = this._method;
-        const self = this;
-        console.log("F-2 XHR send url and body:", url);
+        console.log("F-2 XHR send url:", url);
 
         for (const rule of rules) {
-          const {
-            match = "",
-            payload: rulePayload = {},
-            url: ruleUrl = "",
-            method: ruleMethod = "",
-          } = rule;
-          const hasPayload = rulePayload && rulePayload.length > 0;
-          const urlMatch =
-            match === "PARTIAL_MATCH"
-              ? url.includes(ruleUrl || "")
-              : ruleUrl === url;
-          const methodMatch =
-            !rule.method || method === ruleMethod.toUpperCase();
-          let bodyMatch = true;
-          if (method !== "GET" && hasPayload) {
-            try {
-              if (body && rulePayload && rulePayload.length > 0) {
-                const parsedBody = JSON.parse(body);
-                // loop through rulePayload and check if all of the payloads data is present in the body
-                bodyMatch = rulePayload.every((rule) => {
-                  if (rule.matcher === "Equals") {
-                    return parsedBody[rule.key] === rule.value;
-                  }
-                  if (rule.matcher === "Not Equals") {
-                    return parsedBody[rule.key] !== rule.value;
-                  }
-                  if (rule.matcher === "Contains") {
-                    return (
-                      parsedBody[rule.key] &&
-                      parsedBody[rule.key]?.toString()?.includes(rule.value)
-                    );
-                  }
-                  return false; // if no matcher is found, return false
-                });
-                console.log("Body match result:", bodyMatch);
-              }
-            } catch (error) {
-              console.error(
-                "Error parsing body or checking payload match:",
-                error
-              );
-              bodyMatch = false; // If there's an error, we assume the body doesn't match
-            }
-          }
+          const ruleMatched = matchRule(url, method, body, rule);
 
-          if (urlMatch && methodMatch && bodyMatch) {
-            console.log("[ShadowAPI] Mocking XHR for", url);
-
+          if (ruleMatched) {
             try {
               const { response } = rule;
               Object.defineProperty(xhr, "readyState", { value: 4 });
@@ -227,4 +125,54 @@
 
     window.XMLHttpRequest = MockedXHR;
   }
+
+  const matchRule = (url, method, body, rule) => {
+    const {
+      match = "",
+      payload: rulePayloadRaw = [],
+      url: ruleUrl = "",
+      method: ruleMethod = "",
+    } = rule;
+    const rulePayload = Array.isArray(rulePayloadRaw) ? rulePayloadRaw : [];
+    const hasPayload = rulePayload.length > 0;
+    const urlMatch =
+      match === "PARTIAL_MATCH" ? url.includes(ruleUrl || "") : ruleUrl === url;
+    const methodMatch = !rule.method || method === ruleMethod.toUpperCase();
+    let bodyMatch = false;
+
+    if (method === "GET" || method === "DELETE" || !body) {
+      bodyMatch = true; // For GET requests, we don't check the body
+    } else if (hasPayload) {
+      try {
+        if (body && rulePayload.length > 0) {
+          const parsedBody = typeof body === "string" ? JSON.parse(body) : body;
+
+          // loop through rulePayload and check if all of the payloads data is present in the body
+          bodyMatch = rulePayload.every((rule) => {
+            if (rule.matcher === "Equals") {
+              return parsedBody[rule.key] === rule.value;
+            }
+            if (rule.matcher === "Not Equals") {
+              return parsedBody[rule.key] !== rule.value;
+            }
+            if (rule.matcher === "Contains") {
+              return (
+                parsedBody[rule.key] &&
+                parsedBody[rule.key]?.toString()?.includes(rule.value)
+              );
+            }
+            return false; // if no matcher is found, return false
+          });
+        }
+      } catch (error) {
+        console.error("Error parsing body or checking payload match:", error);
+        bodyMatch = false; // If there's an error, we assume the body doesn't match
+      }
+    }
+
+    if (urlMatch && methodMatch && bodyMatch) {
+      return rule;
+    }
+    return false;
+  };
 })();
