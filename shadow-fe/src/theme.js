@@ -8,6 +8,10 @@ export const charcoalGoldenTheme = extendTheme({
         bg: "#121212", // Charcoal Gray
         color: "#F5F5F5", // Light Text
       },
+      html: {
+        bg: "#121212", // Ensure html is also dark
+        color: "#F5F5F5", // Light Text
+      },
     },
   },
   colors: {
@@ -19,6 +23,14 @@ export const charcoalGoldenTheme = extendTheme({
       text: "#F5F5F5", // Text
       danger: "#FF6B6B",
       // heading: "#FFC857", // Headings
+    },
+    amber: {
+      500: "#FFC857", // for use as colorScheme="amber"
+      600: "#e6b53c",
+    },
+    steel: {
+      500: "#4A5568", // steel gray
+      600: "#2D3748", // darker on hover
     },
   },
 
@@ -47,24 +59,27 @@ export const charcoalGoldenTheme = extendTheme({
       baseStyle: {
         fontWeight: "bold",
       },
+      defaultProps: {
+        colorScheme: "amber",
+      },
       variants: {
-        solid: {
-          bg: "#FFC857",
-          color: "#121212",
+        solid: (props) => ({
+          bg: `${props.colorScheme}.500`,
+          color: props.colorScheme === "steel" ? "#FFFFFF" : "#121212",
           _hover: {
-            bg: "#e6b53c",
+            bg: `${props.colorScheme}.600`,
           },
-        },
-        outline: {
-          borderColor: "#FFC857",
-          color: "#FFC857",
+        }),
+        outline: (props) => ({
+          borderColor: `${props.colorScheme}.500`,
+          color: `${props.colorScheme}.500`,
           _hover: {
-            bg: "#2C2C2C",
+            bg: `${props.colorScheme}.100`,
           },
-        },
+        }),
       },
     },
-  
+
     Link: {
       baseStyle: {
         color: "#FFC857",
@@ -76,4 +91,3 @@ export const charcoalGoldenTheme = extendTheme({
     },
   },
 });
-

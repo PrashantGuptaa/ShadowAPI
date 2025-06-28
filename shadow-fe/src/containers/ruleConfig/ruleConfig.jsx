@@ -1,28 +1,18 @@
 import {
   Box,
-  CircularProgress,
-  CircularProgressLabel,
   Flex,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Heading,
   Text,
-  Input,
   Stack,
   Radio,
   RadioGroup,
-  Select,
   FormControl,
   FormLabel,
   Switch,
   Link,
   Textarea,
+  Button,
 } from "@chakra-ui/react";
-import { AddIcon, CloseIcon } from "@chakra-ui/icons";
+import { AddIcon } from "@chakra-ui/icons";
 import { cloneDeep } from "lodash";
 import SelectWithLabel from "../../components/SelectWithLabel";
 import InputWithLabel from "./../../components/InputWithLabel/inputWithLabel";
@@ -35,13 +25,15 @@ import {
 import { useState } from "react";
 import RulePayload from "../../components/RulePayload";
 import { useRef } from "react";
+import apiRequestUtils from "../../utils/apiRequestUtils";
+import { SAVE_RULE_ENDPOINT } from "../../utils/apiEndpoints";
 
 const RuleConfig = () => {
   const [rule, setRule] = useState({
-    requestType: "GET",
+    method: "GET",
     url: "",
     match: EXACT_MATCH_VAL,
-    hasPayload: true,
+    hasPayload: false,
   });
   const [rulePayload, setRulePayload] = useState([]);
   const [mockResponse, setMockResponse] = useState("");
@@ -94,13 +86,58 @@ const RuleConfig = () => {
     }
   };
 
+  const handleSubmit = async () => {
+    // if (!rule.url || !mockResponse || errors.length) {
+    //   return;
+    // }
+    // // validate payload
+    // const isValidPayload = rulePayload.every((payload) => {
+    //   return payload.key && payload.value;
+    // });
+    // if (!isValidPayload) {
+    //   return;
+    // }
+    const ruleData = {
+      ...rule,
+      payload: rulePayload,
+      response: mockResponse,
+    };
+
+    // save
+    const result = await apiRequestUtils.post(SAVE_RULE_ENDPOINT, ruleData);
+    console.log("REsult", result)
+  };
+
+  const { url, match, method, name, description } = rule;
+  console.log("F-1", rule);
+
   return (
     <Flex alignItems="center" flexDirection="column">
+      <Box bg="brand.surface" p={5} borderRadius={5} width={"50%"} m={2}>
+        <InputWithLabel
+          label="Name"
+          value={name}
+          onChange={(e) => handleChange("name", e?.target?.value)}
+          placeholder="Enter Rule name"
+          isRequired
+          isInvalid={!name}
+          error="This is required"
+        />
+        <InputWithLabel
+          label="Description"
+          value={description}
+          onChange={(e) => handleChange("description", e?.target?.value)}
+          placeholder="Enter Rule Description"
+          isRequired
+          isInvalid={!description}
+          error="This is required"
+        />
+      </Box>
       <Box bg="brand.surface" p={5} borderRadius={5} width={"50%"}>
         <Stack>
           <RadioGroup
-            onChange={(val) => handleChange("requestType", val)}
-            value={rule.requestType}
+            onChange={(val) => handleChange("method", val)}
+            value={method}
           >
             <Flex gap={5} justifyContent="center">
               {REQUEST_TYPE.map((requestName) => (
@@ -113,15 +150,19 @@ const RuleConfig = () => {
           <Flex gap={5}>
             <InputWithLabel
               label="Url"
-              placeholder="Enter url"
-              value={rule.url}
+              value={url}
               onChange={(e) => handleChange("url", e?.target?.value)}
+              placeholder="Enter URL"
+              isRequired
+              isInvalid={!url}
+              error="This is required"
             />
             <SelectWithLabel
               label="Match"
               name="match"
               options={MATCH_OPTIONS}
-              value={rule.match}
+              value={match}
+              onChange={(e) => handleChange("match", e?.target?.value)}
             />
           </Flex>
           <FormControl display="flex" alignItems="center" mb={2}>
@@ -132,7 +173,7 @@ const RuleConfig = () => {
               id="payload-toggle"
               isChecked={rule.hasPayload}
               onChange={(e) => handleChange("hasPayload", e.target.checked)}
-              colorScheme="yellow"
+              colorScheme="amber"
             />
           </FormControl>
           {rule.hasPayload && (
@@ -176,9 +217,17 @@ const RuleConfig = () => {
           value={mockResponse}
           onChange={handleMockResponse}
         />
-        <Text mb="8px" color={"brand.danger"} size='lg' rows={8}>
+        <Text mb="8px" color={"brand.danger"} size="lg" rows={8}>
           {errors.response}
         </Text>
+      </Box>
+      <Box bg="brand.surface" width={"50%"} p="5" m="2">
+        <Flex justifyContent={"space-between"}>
+          <Button colorScheme="steel">Cancel</Button>
+          <Button ml={3} onClick={handleSubmit}>
+            Submit
+          </Button>
+        </Flex>
       </Box>
     </Flex>
   );
