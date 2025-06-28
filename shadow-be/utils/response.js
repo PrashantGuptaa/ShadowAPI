@@ -35,7 +35,7 @@ const sendError = (
   { message = "Something went wrong", statusCode = 500, err = {}, data = null } = {}
 ) => {
     const error = err.message || err.toString?.() || "Unknown error";
-    console.error("Error:", error);
+    console.error("Error:", err);
   sendResponse(res, {
     status: "error",
     message,
