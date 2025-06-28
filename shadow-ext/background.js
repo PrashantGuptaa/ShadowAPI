@@ -1,11 +1,14 @@
 async function fetchAndStoreRules() {
   try {
-    const res = await fetch('http://localhost:3210/api/v1/interceptor/data');
+    const res = await fetch("http://localhost:3210/api/v1/rule/active-rules");
     const result = await res.json();
-    const rulesFromServer = result?.data?.data || [];
-
+    const rulesFromServer = result?.data || [];
+    console.log("[ShadowAPI] Fetched rules from server:", rulesFromServer, result);
     chrome.storage.local.set({ rules: rulesFromServer }, () => {
-      console.log("[ShadowAPI] Rules saved to storage for injection.");
+      console.log(
+        "[ShadowAPI] Rules saved to storage for injection.",
+        rulesFromServer
+      );
     });
 
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
