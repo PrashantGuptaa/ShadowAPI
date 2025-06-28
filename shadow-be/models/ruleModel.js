@@ -43,7 +43,7 @@ const ruleSchema = new Schema(
       required: true,
       trim: true,
     },
-    urlMatchType: {
+    match: {
       type: String,
       enum: [PARTIAL_MATCH_ENUM, EXACT_MATCH_ENUM],
       default: PARTIAL_MATCH_ENUM,
@@ -72,6 +72,12 @@ const ruleSchema = new Schema(
   }
 );
 
-ruleSchema.plugin(AutoIncrement, { inc_field: "ruleId" });
+ruleSchema.plugin(AutoIncrement, {
+  inc_field: "ruleId",
+  id: "ruleId_counter", // optional: custom counter ID
+  disable_hooks: false,
+});
+
 const Rule = model("Rule", ruleSchema);
+
 module.exports = Rule;

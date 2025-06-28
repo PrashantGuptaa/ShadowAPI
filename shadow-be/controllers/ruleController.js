@@ -1,4 +1,8 @@
-const { getRulesByUserIdService } = require("../services/ruleService");
+const {
+  getRulesByUserIdService,
+  saveRuleService,
+  fetchActiveRulesToMockService,
+} = require("../services/ruleService");
 const { sendSuccess, sendError } = require("../utils/response");
 
 const fetchRulesController = async (req, res) => {
@@ -24,6 +28,43 @@ const fetchRulesController = async (req, res) => {
   }
 };
 
+const saveRuleController = async (req, res) => {
+  try {
+    await saveRuleService(req.body);
+    sendSuccess(res, {
+      message: "Rule saved successfully",
+      statusCode: 201,
+    });
+  } catch (error) {
+    sendError(res, {
+      message: "Error saving rule",
+      err: error,
+      statusCode: 500,
+    });
+  }
+};
+
+const getActiveRulesToMockController = async (req, res) => {
+  try {
+    
+    const userId = req.user?.userId;
+    const rules = await fetchActiveRulesToMockService(userId);
+    sendSuccess(res, {
+      data: rules,
+      message: "Active rules fetched successfully",
+    });
+  } catch (error) {
+    sendError(res, {
+      message: "Error fetching active rules",
+      err: error,
+      statusCode: 500,
+    });
+  }
+}
+
 module.exports = {
   fetchRulesController,
+  saveRuleController,
+  getActiveRulesToMockController,
 };
+

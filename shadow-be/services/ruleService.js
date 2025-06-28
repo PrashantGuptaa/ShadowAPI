@@ -23,6 +23,36 @@ const getRulesByUserIdService = async (userId, pageNum = 1, pageSize = 20) => {
   };
 };
 
+const saveRuleService = async (ruleData) => {
+  // validate ruleData
+  const { url, method, match, hasPayload, payload, response } = ruleData;
+  if (!url || !method || !match || (hasPayload && !payload) || !response) {
+    throw new Error("Invalid rule data");
+  }
+  // create or update rule
+  const rule = new Rule({
+    ...ruleData,
+    createdBy: ruleData.createdBy || 1, // default to system if not provided
+    updatedBy: ruleData.updatedBy || 1,
+  });
+  const savedRule = await rule.save();
+  return savedRule;
+};
+
+const fetchActiveRulesToMockService = async (userId) => {
+  // if (!userId) {
+  //   throw new Error("User ID is required to fetch active rules");
+  // }
+  const rules = await Rule.find({
+    // isActive: true,
+    // deleted: false,
+    // createdBy: userId,
+  });
+  return rules;
+};
+
 module.exports = {
   getRulesByUserIdService,
+  saveRuleService,
+  fetchActiveRulesToMockService,
 };
