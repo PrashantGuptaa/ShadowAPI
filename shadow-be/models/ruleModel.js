@@ -50,19 +50,19 @@ const ruleSchema = new Schema(
     },
     isActive: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     deleted: {
       type: Boolean,
       default: false,
     },
     createdBy: {
-      type: Number,
+      type: String,
       ref: "User",
       required: true,
     },
     updatedBy: {
-      type: Number,
+      type: String,
       ref: "User",
       required: true,
     },

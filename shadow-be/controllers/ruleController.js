@@ -1,5 +1,5 @@
 const {
-  getRulesByUserIdService,
+  getRulesByEmailService,
   saveRuleService,
   fetchActiveRulesToMockService,
 } = require("../services/ruleService");
@@ -9,9 +9,9 @@ const fetchRulesController = async (req, res) => {
   try {
     const { pageSize, pageNum } = req.query;
 
-    const userId = req.user?.userId;
-    const result = await getRulesByUserIdService(
-      userId,
+    const email = req.user?.email;
+    const result = await getRulesByEmailService(
+      email,
       parseInt(pageNum) || 1,
       parseInt(pageSize) || 20
     );
@@ -30,7 +30,7 @@ const fetchRulesController = async (req, res) => {
 
 const saveRuleController = async (req, res) => {
   try {
-    await saveRuleService(req.body);
+    await saveRuleService(req.body, req.user?.email);
     sendSuccess(res, {
       message: "Rule saved successfully",
       statusCode: 201,
@@ -46,7 +46,6 @@ const saveRuleController = async (req, res) => {
 
 const getActiveRulesToMockController = async (req, res) => {
   try {
-    
     const userId = req.user?.userId;
     const rules = await fetchActiveRulesToMockService(userId);
     sendSuccess(res, {
@@ -60,11 +59,10 @@ const getActiveRulesToMockController = async (req, res) => {
       statusCode: 500,
     });
   }
-}
+};
 
 module.exports = {
   fetchRulesController,
   saveRuleController,
   getActiveRulesToMockController,
 };
-

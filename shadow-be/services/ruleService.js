@@ -1,21 +1,22 @@
 const Rule = require("../models/ruleModel");
+const AppError = require("../utils/appError");
 
-const getRulesByUserIdService = async (userId, pageNum = 1, pageSize = 20) => {
-  if (!userId) {
-    throw new Error("User ID is required to fetch rules");
+const getRulesByEmailService = async (email, pageNum = 1, pageSize = 20) => {
+  console.log("Fetching rules for user:", email);
+  if (!email) {
+    throw new AppError("Email is required to fetch rules", 400);
   }
   const offset = (pageNum - 1) * pageSize;
   const rules = await Rule.find(
-    { isActive: true, deleted: false, createdBy: userId },
-    "ruleId name description method url createdBy updatedBy"
+    { deleted: false, createdBy: email },
+    "ruleId name description method url updatedBy updatedAt isActive"
   )
     .skip(offset)
     .limit(pageSize)
     .sort({ updatedAt: -1 });
   const totalCount = await Rule.countDocuments({
-    isActive: true,
     deleted: false,
-    createdBy: userId,
+    createdBy: email,
   });
   return {
     rules,
@@ -23,7 +24,7 @@ const getRulesByUserIdService = async (userId, pageNum = 1, pageSize = 20) => {
   };
 };
 
-const saveRuleService = async (ruleData) => {
+const saveRuleService = async (ruleData, email) => {
   // validate ruleData
   const { url, method, match, hasPayload, payload, response } = ruleData;
   if (!url || !method || !match || (hasPayload && !payload) || !response) {
@@ -32,8 +33,8 @@ const saveRuleService = async (ruleData) => {
   // create or update rule
   const rule = new Rule({
     ...ruleData,
-    createdBy: ruleData.createdBy || 1, // default to system if not provided
-    updatedBy: ruleData.updatedBy || 1,
+    createdBy: email,
+    updatedBy: email,
   });
   const savedRule = await rule.save();
   return savedRule;
@@ -52,7 +53,7 @@ const fetchActiveRulesToMockService = async (userId) => {
 };
 
 module.exports = {
-  getRulesByUserIdService,
+  getRulesByEmailService,
   saveRuleService,
   fetchActiveRulesToMockService,
 };

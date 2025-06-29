@@ -1,5 +1,3 @@
-// utils/response.js
-
 const sendResponse = (
   res,
   {
@@ -35,7 +33,7 @@ const sendError = (
   { message = "Something went wrong", statusCode, err = {}, data = null } = {}
 ) => {
   const error = err.message || err.toString?.() || "Unknown error";
-  // console.error("Error:", err);
+  console.error("Error:", err);
   sendResponse(res, {
     status: "error",
     message,

@@ -9,7 +9,7 @@ const {
 const ruleRoutes = express.Router();
 
 ruleRoutes.get("/collection", validateUser, fetchRulesController);
-ruleRoutes.post("/create", saveRuleController);
-ruleRoutes.get("/active-rules", getActiveRulesToMockController );
+ruleRoutes.post("/create", validateUser, saveRuleController);
+ruleRoutes.get("/active-rules", validateUser, getActiveRulesToMockController);
 
 module.exports = ruleRoutes;
