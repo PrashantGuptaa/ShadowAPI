@@ -9,7 +9,7 @@ script.onload = () => {
 
 (document.head || document.documentElement).appendChild(script);
 
-// ✅ Listen for window message FROM page context
+// Listen for window message FROM page context
 window.addEventListener("message", (event) => {
   if (
     event.source !== window ||
