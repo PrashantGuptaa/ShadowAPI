@@ -8,7 +8,7 @@ const {
 } = require("../controllers/ruleController");
 
 const ruleRoutes = express.Router();
-// ruleRoutes.use(validateUser);
+ruleRoutes.use(validateUser);
 
 ruleRoutes.get("/collection", fetchRulesController);
 ruleRoutes.post("/create", saveRuleController);
