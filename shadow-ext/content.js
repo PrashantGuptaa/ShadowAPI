@@ -1,15 +1,20 @@
 console.log("[ShadowAPI] content.js running");
 
-const script = document.createElement("script");
-script.src = chrome.runtime.getURL("injectedFetch.js");
-script.onload = () => {
-  console.log("[ShadowAPI] injectedFetch.js injected into page context");
-  script.remove();
-};
+// Function to inject fetch/XHR logic into the page context
+function injectOverrideScript() {
+  const script = document.createElement("script");
+  script.src = chrome.runtime.getURL("injectedFetch.js");
+  script.onload = () => {
+    console.log("[ShadowAPI] injectedFetch.js injected into page context");
+    script.remove();
+  };
+  (document.head || document.documentElement).appendChild(script);
+}
 
-(document.head || document.documentElement).appendChild(script);
+// Inject immediately when content script loads
+injectOverrideScript();
 
-// Listen for window message FROM page context
+// Listen for messages from the page (injected script asking for rules)
 window.addEventListener("message", (event) => {
   if (
     event.source !== window ||
@@ -31,4 +36,16 @@ window.addEventListener("message", (event) => {
       "*"
     );
   });
+});
+
+// Listen for messages from the background or popup (e.g. manual reinjection)
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "INJECT_SCRIPT") {
+    console.log("[ShadowAPI] content.js received INJECT_SCRIPT message");
+    // fetch rules
+    
+    injectOverrideScript();
+    
+    sendResponse({ status: "injected" });
+  }
 });

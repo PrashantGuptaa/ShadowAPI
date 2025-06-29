@@ -21,7 +21,7 @@
                   border-radius: 5px;
             }
 
-            button {
+            .ext-button {
                   background-color: #FFC857;
                   /* Golden Amber */
                   border: none;
@@ -33,7 +33,7 @@
                   width: 100%;
             }
 
-            button:hover {
+            .ext-button:hover {
                   background-color: #e6b53c;
             }
 
@@ -76,16 +76,19 @@
       <div id="loginForm">
             <input id="email" type="email" placeholder="Enter your email" required>
             <input id="password" type="password" placeholder="Enter your password" required>
-            <button id="rule-login">Login</button>
+            <button class="ext-button" id="rule-login">Login</button>
       </div>
 
+      <input class="ext-button" type="button" id="toggle-extension" value="Enable" style="transition: 0.5s;" />
+  
 
-      <button id="open-dashboard">
+      <button class="ext-button" id="open-dashboard">
             <a href="http://localhost:5173/dashboard" target="_blank" style="text-decoration: none; color: inherit;">
                   Open Dashboard
             </a>
       </button>
       <p id="status"></p>
+      <div id="extension-status"></div>
 
       <script src="popup.js"></script>
 </body>
