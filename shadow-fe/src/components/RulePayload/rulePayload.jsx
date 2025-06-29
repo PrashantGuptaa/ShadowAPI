@@ -15,10 +15,10 @@ const RulePayload = ({ handlePayloadUpdate, handleRemove, id, payload }) => {
           onChange={(e) => handlePayloadUpdate(id, "key", e?.target?.value)}
         />
         <SelectWithLabel
-          label="Type"
+          label="Match"
           options={PAYLOAD_CONFIG}
-          value={payload.type}
-          onChange={(e) => handlePayloadUpdate(id, "type", e?.target?.value)}
+          value={payload.matcher}
+          onChange={(e) => handlePayloadUpdate(id, "matcher", e?.target?.value)}
         />
         <InputWithLabel
           label="Value"

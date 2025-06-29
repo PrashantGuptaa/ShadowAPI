@@ -32,6 +32,5 @@ export const PAYLOAD_CONFIG = [
 export const RULE_PAYLOAD = {
   key: "",
   value: "",
-  type: "",
   matcher: EQUALS_PAYLOAD_MATCH,
 };

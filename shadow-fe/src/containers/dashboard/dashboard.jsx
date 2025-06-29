@@ -13,9 +13,15 @@ import {
   Heading,
   Switch,
   Text,
+  Button,
 } from "@chakra-ui/react";
-import { FETCH_RULES_ENDPOINT } from "../../utils/apiEndpoints";
+import {
+  FETCH_ACTIVE_RULES_ENDPOINT,
+  FETCH_RULES_ENDPOINT,
+  UPDATE_RULE_STATUS_ENDPOINT,
+} from "../../utils/apiEndpoints";
 import ApiRequestUtils from "../../utils/apiRequestUtils";
+import { RULE_DASHBOARD_COLUMNS } from "./dashboard.config";
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
@@ -45,7 +51,34 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  const handleActiveToggle = async (ruleId, isActive) => {};
+  const handleActiveToggle = async (ruleId, isActive) => {
+    try {
+      setLoading(true);
+      const response = await ApiRequestUtils.put(UPDATE_RULE_STATUS_ENDPOINT, {
+        ruleId,
+        isActive,
+      });
+      const rule = response?.data?.data;
+      const updatedRules = rules.map((r) =>
+        r.ruleId === ruleId ? { ...r, isActive: rule.isActive } : r
+      );
+      setRules(updatedRules);
+      console.log("F-2 Response", response);
+    } catch (error) {
+      console.error("Error updating rule status:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFetchActiveRules = async () => {
+    try {
+      const response = await ApiRequestUtils.get(FETCH_ACTIVE_RULES_ENDPOINT);
+      console.log("Active rules", response);
+    } catch (e) {
+      console.error("Error fetching active rules:", e);
+    }
+  };
   return (
     <Box
       bg="brand.surface"
@@ -58,22 +91,37 @@ const Dashboard = () => {
       justifyContent="center"
     >
       {loading ? (
-        <CircularProgress isIndeterminate size="120px" thickness="4px" />
+        <Flex
+          justifyContent={"center"}
+          flexDirection={"column"}
+          alignItems={"center"}
+        >
+          <CircularProgress
+            isIndeterminate
+            size="60px"
+            thickness="4px"
+            color="brand.primary"
+          />
+        </Flex>
       ) : (
         <Box>
-          <Text
-            pb={"4"}
-          >{`Showing ${rules?.length} out of ${totalRules} rule(s)`}</Text>
+          <Flex pb={2} justifyContent={"space-between"} alignItems="center">
+            <Text
+              // pb={"4"}
+            >{`Showing ${rules?.length} out of ${totalRules} rule(s)`}</Text>
+            <Button colorScheme="steel" onClick={handleFetchActiveRules}>
+              Fetch Active Rules
+            </Button>
+          </Flex>
+
           <Table variant="simple">
             <Thead bg="brand.primary">
               <Tr>
-                <Th color="#121212">Name</Th>
-                <Th color="#121212">Description</Th>
-                <Th color="#121212">Method</Th>
-                <Th color="#121212">URL</Th>
-                <Th color="#121212">Active</Th>
-                <Th color="#121212">Last Updated At</Th>
-                <Th color="#121212">Last Updated By</Th>
+                {RULE_DASHBOARD_COLUMNS.map((column) => (
+                  <Th key={column} color="#121212">
+                    {column}
+                  </Th>
+                ))}
               </Tr>
             </Thead>
             <Tbody>
