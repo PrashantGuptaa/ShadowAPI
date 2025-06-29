@@ -126,7 +126,7 @@
     window.XMLHttpRequest = MockedXHR;
   }
 
-  const matchRule = (url, method, body, rule) => {
+  const matchRule = (url = "", method = "", body = "", rule = {}) => {
     const {
       match = "",
       payload: rulePayloadRaw = [],
@@ -138,6 +138,18 @@
     const urlMatch =
       match === "PARTIAL_MATCH" ? url.includes(ruleUrl || "") : ruleUrl === url;
     const methodMatch = !rule.method || method === ruleMethod.toUpperCase();
+    console.log(
+      "F-1 Url and method match:",
+      ruleUrl,
+      urlMatch,
+      methodMatch,
+      "for url",
+      url,
+      "and method",
+      method,
+      rulePayload,
+      body
+    );
     let bodyMatch = false;
 
     if (method === "GET" || method === "DELETE" || !body) {
@@ -158,7 +170,7 @@
             if (rule.matcher === "Contains") {
               return (
                 parsedBody[rule.key] &&
-                parsedBody[rule.key]?.toString()?.includes(rule.value)
+                JSON.stringify(parsedBody[rule.key])?.includes(rule.value)
               );
             }
             return false; // if no matcher is found, return false

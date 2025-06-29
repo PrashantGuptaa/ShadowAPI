@@ -19,7 +19,6 @@
                   flex-direction: column;
                   align-items: center;
                   border-radius: 5px;
-
             }
 
             button {
@@ -37,13 +36,55 @@
             button:hover {
                   background-color: #e6b53c;
             }
+
+            #loginForm {
+                  display: flex;
+                  flex-direction: column;
+                  width: 100%;
+            }
+
+            input {
+                  padding: 5px;
+                  border-radius: 4px;
+                  border: 1px solid #ccc;
+                  font-size: 14px;
+                  margin: 5px 0px;
+                  width: 95%;
+            }
+
+            #open-dashboard {
+                  background-color: #4A5568;
+                  /* Green */
+                  color: white;
+                  border: none;
+                  text-align: center;
+                  text-decoration: none;
+                  display: inline-block;
+                  margin-top: 20px;
+                  cursor: pointer;
+            }
+
+            #open-dashboard:hover {
+                  background-color: #2D3748;
+            }
       </style>
 </head>
 
 <body>
       <img src="assets/shadowGolden.png" alt="ShadowAPI Icon" width="120">
       <h2>ShadowAPI</h2>
-      <button id="fetchRules">Start</button>
+      <div id="loginForm">
+            <input id="email" type="email" placeholder="Enter your email" required>
+            <input id="password" type="password" placeholder="Enter your password" required>
+            <button id="rule-login">Login</button>
+      </div>
+
+
+      <button id="open-dashboard">
+            <a href="http://localhost:5173/dashboard" target="_blank" style="text-decoration: none; color: inherit;">
+                  Open Dashboard
+            </a>
+      </button>
       <p id="status"></p>
 
       <script src="popup.js"></script>
