@@ -14,6 +14,8 @@ import {
 import { Link as RouterLink } from "react-router";
 import InputWithLabel from "../../components/InputWithLabel/inputWithLabel";
 import { isValidEmail, isValidPassword } from "../../utils/validationUtils";
+import apiRequestUtils from "../../utils/apiRequestUtils";
+import { LOGIN_ENDPOINT } from "../../utils/apiEndpoints";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -21,7 +23,7 @@ export default function LoginPage() {
   const [errors, setErrors] = useState({});
   const toast = useToast();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Here you would typically handle the login logic, e.g., API call
     console.log("Email:", email);
@@ -44,7 +46,30 @@ export default function LoginPage() {
       });
       return;
     }
+    try {
+      const result = await apiRequestUtils.post(LOGIN_ENDPOINT, {
+        email,
+        password,
+      });
+      console.log("result", result);
+    } catch (error) {
+      console.error("Login error:", error);
+      const errorMessage =
+        error.response?.data?.error || "Login failed. Please try again.";
+      toast({
+        title: errorMessage,
+        position: "top",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+      
+    }
+
+ 
   };
+
   return (
     <Flex
       height="100vh"
@@ -91,7 +116,7 @@ export default function LoginPage() {
               isRequired
               helperText="Password must be 8+ characters, include uppercase, lowercase, number & special character."
               isInvalid={!isValidPassword(password) || errors.password}
-              error="Password must be at least 8 characters long."
+              error="Invalid password."
             />
             <Flex justify="flex-end">
               <ChakraLink fontSize="sm">Forgot password?</ChakraLink>

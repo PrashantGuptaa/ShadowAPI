@@ -39,7 +39,7 @@ const InputWithLabel = ({
         }}
         {...props}
       />
-      {!touched && helperText && !isInvalid && (
+      {helperText && (
         <FormHelperText>{helperText}</FormHelperText>
       )}
       {showError && error && <FormErrorMessage>{error}</FormErrorMessage>}

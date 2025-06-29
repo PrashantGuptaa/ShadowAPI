@@ -18,7 +18,7 @@ const MotionBox = motion(Box);
 
 const EmailVerification = () => {
   // fetch token from url
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [alertData, setAlertData] = useState({
     status: "info",
     title: "Verification Pending",
@@ -36,7 +36,7 @@ const EmailVerification = () => {
           token,
         });
         console.info("Email verification response:", response);
-        localStorage.setItem("authToken", response.data.token);
+        localStorage.setItem("authToken", response?.data?.data);
         setAlertData({
           status: "success",
           title: "Email Verified Successfully",
