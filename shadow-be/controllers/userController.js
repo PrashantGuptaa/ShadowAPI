@@ -34,7 +34,6 @@ const getUserController = async (req, res) => {
     sendError(res, {
       message: "Error fetching user",
       err,
-      statusCode: 500,
     });
   }
 };
@@ -54,7 +53,6 @@ const registerUserController = async (req, res) => {
     sendError(res, {
       message: "Error registering user",
       err,
-      statusCode: 500,
     });
   }
 };
@@ -72,7 +70,6 @@ const loginUserController = async (req, res) => {
     sendError(res, {
       message: "Error logging in user",
       err: error,
-      statusCode: 500,
     });
   }
 };
@@ -80,16 +77,16 @@ const loginUserController = async (req, res) => {
 const verifyUserEmailController = async (req, res) => {
   try {
     const { token } = req.body;
-    await verifyEmailService(token);
+    const response = await verifyEmailService(token);
     sendSuccess(res, {
       message: "User email verified successfully",
       statusCode: 200,
+      data: response,
     });
   } catch (err) {
     sendError(res, {
       message: "Error verifying user email",
       err,
-      statusCode: 500,
     });
   }
 };

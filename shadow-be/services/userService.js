@@ -1,5 +1,4 @@
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const moment = require("moment");
 const User = require("../models/userModel");
 const {
@@ -10,14 +9,20 @@ const {
 } = require("unique-names-generator");
 
 const { sendEmailService } = require("./emailService");
-const { text } = require("express");
+const AppError = require("../utils/appError");
+const {
+  isValidPassword,
+  isValidEmail,
+  generateUserJwtToken,
+  verifyUserJwtToken,
+} = require("../utils/helperFunc");
 
 const registerUserService = async (userData) => {
   console.info("Registering user with data:", userData);
   // Email, username and password are required
   const { email, name, password } = userData;
   if (!email || !name || !password) {
-    throw new Error("Email, name, and password are required");
+    throw new AppError("Email, name, and password are required", 400);
   }
   const userName =
     userData.userName ||
@@ -30,21 +35,26 @@ const registerUserService = async (userData) => {
   // Check if the user already exists
   const existingUser = await User.find({ email });
   if (existingUser.length > 0) {
-    throw new Error("User already exists with this email. Please login.");
+    throw new AppError(
+      "User already exists with this email. Please login.",
+      409
+    );
   }
 
   // Validate the email format
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    throw new Error("Invalid email format");
+  if (!isValidEmail(email)) {
+    throw new AppError("Invalid email format", 400);
   }
   // Validate the password length
-  if (password.length < 6) {
-    throw new Error("Password must be at least 6 characters long");
+  if (!isValidPassword(password)) {
+    throw new AppError(
+      "Password must be 8+ characters, include uppercase, lowercase, number & special character.",
+      400
+    );
   }
   // Validate the name length
   if (name.length < 3) {
-    throw new Error("Name must be at least 3 characters long");
+    throw new AppError("Name must be at least 3 characters long", 400);
   }
   // hash the password
   const saltRounds = 10;
@@ -61,21 +71,19 @@ const registerUserService = async (userData) => {
     const user = new User(newUser);
     const { _id, userId } = await user.save();
     console.info("User registered successfully:", _id, userId, user.email);
-    const token = jwt.sign({ _id, userId }, process.env.USER_JWT_SECRET, {
-      expiresIn: "1h", // optional
-    });
+    const token = generateUserJwtToken(user, "1h");
     // Send verification email
     await sendVerificationEmailService(email);
     return { token, email, name, userName, userId, _id };
   } catch (error) {
-    throw new Error("Error registering user: " + error.message);
+    throw new AppError("Error registering user: " + error.message, 400);
   }
 };
 
 const loginUserService = async (email, password) => {
   console.info("Login attempt for email:", email);
   if (!email || !password) {
-    throw new Error("Email and password are required");
+    throw new AppError("Email and password are required", 400);
   }
   // Check if the user exists
   const user = await User.find(
@@ -83,11 +91,11 @@ const loginUserService = async (email, password) => {
     "email name role userId password id userName"
   );
   if (user.length === 0) {
-    throw new Error("User not found with this email");
+    throw new AppError("User not found with this email", 404);
   }
   // validate multiple users with same email
   if (user.length > 1) {
-    throw new Error("Multiple users found with the same email");
+    throw new AppError("Multiple users found with the same email", 409);
   }
   // Compare the password with the hashed password in the database
   const isPasswordValid = await bcrypt.compare(
@@ -95,14 +103,12 @@ const loginUserService = async (email, password) => {
     user[0].password
   );
   if (!isPasswordValid) {
-    throw new Error("Invalid password");
+    throw new AppError("Invalid password", 401);
   }
   // If the user exists and the password is valid, return the user data
   const { name, role, userId, userName, _id } = user[0] || {};
   console.info("User logged in successfully:", email);
-  const token = jwt.sign({ _id, userId }, process.env.USER_JWT_SECRET, {
-    expiresIn: "1h", // optional
-  });
+  const token = generateUserJwtToken(user[0], "24h");
   return {
     token,
     email,
@@ -117,7 +123,7 @@ const loginUserService = async (email, password) => {
 const sendVerificationEmailService = async (email) => {
   console.info("Sending verification email to:", email);
   if (!email) {
-    throw new Error("Email is required to send verification email");
+    throw new AppError("Email is required to send verification email", 401);
   }
   // Check if the user exists with the provided email
   const userExists = await User.findOne(
@@ -125,11 +131,11 @@ const sendVerificationEmailService = async (email) => {
     "email isActive isEmailVerified verificationEmailLastSent"
   );
   if (!userExists) {
-    throw new Error(`User with email ${email} does not exist`);
+    throw new AppError(`User with email ${email} does not exist`, 404);
   }
   // Check if the user is already verified
   if (userExists.isEmailVerified) {
-    throw new Error(`User with email ${email} is already verified`);
+    throw new AppError(`User with email ${email} is already verified`, 409);
   }
   // Check if the verification email was sent in the last 10 mins
   const currentTime = moment().toDate();
@@ -146,8 +152,9 @@ const sendVerificationEmailService = async (email) => {
     lastSentTime &&
     currentTime - lastSentTime < 10 * 60 * 1000 // 10 minutes in milliseconds
   ) {
-    throw new Error(
-      `Verification email was already sent to ${email} in the last 10 minutes`
+    throw new AppError(
+      `Verification email was already sent to ${email} in the last 10 minutes`,
+      401
     );
   }
   // Update the last sent time for the verification email
@@ -156,10 +163,8 @@ const sendVerificationEmailService = async (email) => {
     { verificationEmailLastSent: currentTime },
     { new: true } // Return the updated user
   );
-
-  const token = jwt.sign({ email: email }, process.env.USER_JWT_SECRET, {
-    expiresIn: "10m",
-  });
+  const token = generateUserJwtToken({ email }, "10m");
+  console.info("Generated token for email verification:", token);
 
   const verificationUrl = `${process.env.FE_APP_URL}verify-email?token=${token}`;
   console.info("Verification URL:", verificationUrl);
@@ -183,13 +188,14 @@ const sendVerificationEmailService = async (email) => {
 const verifyEmailService = async (token) => {
   console.info("Verifying email with token:", token);
   if (!token) {
-    throw new Error("Token is required for email verification");
+    throw new AppError("Token is required for email verification", 401);
   }
   try {
-    const decoded = jwt.verify(token, process.env.USER_JWT_SECRET);
+    // const decoded = jwt.verify(token, process.env.USER_JWT_SECRET);
+    const decoded = verifyUserJwtToken(token);
     // check if the token has expired
     if (!decoded || !decoded?.email) {
-      throw new Error("Invalid token");
+      throw new AppError("Invalid token", 401);
     }
     const { email } = decoded;
     console.info("Decoded email from token:", email);
@@ -200,10 +206,10 @@ const verifyEmailService = async (token) => {
       "email isActive isEmailVerified"
     );
     if (!userExists) {
-      throw new Error(`User with email ${email} does not exist`);
+      throw new AppError(`User with email ${email} does not exist`, 404);
     }
     if (userExists.isEmailVerified) {
-      throw new Error(`User with email ${email} is already verified`);
+      throw new AppError(`User with email ${email} is already verified`, 409);
     }
 
     // Find the user by email and update their isActive status to true and isEmailVerified to true
@@ -214,10 +220,11 @@ const verifyEmailService = async (token) => {
     );
 
     console.info("Email verified successfully for user:", user.email);
-    return user;
+    const tokenResponse = generateUserJwtToken(user, "24h");
+    return tokenResponse;
   } catch (error) {
     console.error("Error verifying email:", error);
-    throw new Error("Invalid or expired token");
+    throw new AppError("Invalid or expired token", 401);
   }
 };
 

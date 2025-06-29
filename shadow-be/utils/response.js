@@ -32,15 +32,15 @@ const sendSuccess = (
 
 const sendError = (
   res,
-  { message = "Something went wrong", statusCode = 500, err = {}, data = null } = {}
+  { message = "Something went wrong", statusCode, err = {}, data = null } = {}
 ) => {
-    const error = err.message || err.toString?.() || "Unknown error";
-    console.error("Error:", err);
+  const error = err.message || err.toString?.() || "Unknown error";
+  // console.error("Error:", err);
   sendResponse(res, {
     status: "error",
     message,
     data,
-    statusCode,
+    statusCode: statusCode || err.statusCode || 500,
     error,
   });
 };
