@@ -2,6 +2,7 @@ const {
   getRulesByEmailService,
   saveRuleService,
   fetchActiveRulesToMockService,
+  updateRuleStatusService,
 } = require("../services/ruleService");
 const { sendSuccess, sendError } = require("../utils/response");
 
@@ -61,8 +62,25 @@ const getActiveRulesToMockController = async (req, res) => {
   }
 };
 
+const updateRuleStatusController = async (req, res) => {
+  try {
+    const { ruleId, isActive } = req.body;
+    const data = await updateRuleStatusService(ruleId, isActive, req.user?.email);
+    sendSuccess(res, {
+      message: "Rule status updated successfully",
+      data,
+    });
+  } catch (error) {
+    sendError(res, {
+      message: "Error updating rule status",
+      err: error,
+    });
+  }
+};
+
 module.exports = {
   fetchRulesController,
   saveRuleController,
   getActiveRulesToMockController,
+  updateRuleStatusController,
 };

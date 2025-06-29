@@ -4,6 +4,7 @@ const validateUser = (req, res, next) => {
   // Middleware to validate user data
   const token = req.headers["auth-token"];
   if (!token) {
+    console.warn("Unauthorized access attempt: No token provided");
     return res.status(401).json({ message: "Unauthorized: No token provided" });
   }
   try {

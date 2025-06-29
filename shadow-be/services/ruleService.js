@@ -40,7 +40,8 @@ const saveRuleService = async (ruleData, email) => {
   return savedRule;
 };
 
-const fetchActiveRulesToMockService = async (userId) => {
+const fetchActiveRulesToMockService = async (email) => {
+  console.log("Fetching active rules for user:", email);
   // if (!userId) {
   //   throw new Error("User ID is required to fetch active rules");
   // }
@@ -52,8 +53,24 @@ const fetchActiveRulesToMockService = async (userId) => {
   return rules;
 };
 
+const updateRuleStatusService = async (ruleId, isActive, email) => {
+  if (!ruleId || typeof isActive !== "boolean") {
+    throw new AppError("Invalid rule ID or status", 400);
+  }
+  const rule = await Rule.findOneAndUpdate(
+    { ruleId, createdBy: email, deleted: false },
+    { isActive, updatedBy: email },
+    { new: true }
+  );
+  if (!rule) {
+    throw new AppError("Rule not found or you do not have permission to update it", 404);
+  }
+  return rule;
+}
+
 module.exports = {
   getRulesByEmailService,
   saveRuleService,
   fetchActiveRulesToMockService,
+  updateRuleStatusService,
 };
