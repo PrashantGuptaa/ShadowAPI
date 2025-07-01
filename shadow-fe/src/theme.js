@@ -55,6 +55,44 @@ export const charcoalGoldenTheme = extendTheme({
         },
       },
     },
+    Alert: {
+      baseStyle: {
+        container: {
+          borderRadius: "md",
+          fontSize: "sm",
+        },
+      },
+      variants: {
+        subtle: (props) => {
+          const colorMap = {
+            info: {
+              bg: "#1F1F1F",
+              color: "#FFC857", // Golden amber text
+            },
+            success: {
+              bg: "#1F1F1F",
+              color: "#8AE99A", // Soft green
+            },
+            warning: {
+              bg: "#2C2C2C",
+              color: "#FFD369", // Light amber
+            },
+            error: {
+              bg: "#2C2C2C",
+              color: "#FF6B6B", // Coral red
+            },
+          };
+          const colors = colorMap[props.status] || colorMap.info;
+
+          return {
+            container: {
+              bg: colors.bg,
+              color: colors.color,
+            },
+          };
+        },
+      },
+    },
     Button: {
       baseStyle: {
         fontWeight: "bold",

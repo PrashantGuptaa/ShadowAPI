@@ -47,8 +47,8 @@ const saveRuleController = async (req, res) => {
 
 const getActiveRulesToMockController = async (req, res) => {
   try {
-    const userId = req.user?.userId;
-    const rules = await fetchActiveRulesToMockService(userId);
+    const email = req.user?.email;
+    const rules = await fetchActiveRulesToMockService(email);
     sendSuccess(res, {
       data: rules,
       message: "Active rules fetched successfully",

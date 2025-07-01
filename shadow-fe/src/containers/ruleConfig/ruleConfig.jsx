@@ -11,6 +11,11 @@ import {
   Link,
   Textarea,
   Button,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
+  CircularProgress,
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 import { cloneDeep } from "lodash";
@@ -38,6 +43,8 @@ const RuleConfig = () => {
   const [rulePayload, setRulePayload] = useState([]);
   const [mockResponse, setMockResponse] = useState("");
   const [errors, setErrors] = useState({});
+  const [alertData, setAlertData] = useState({});
+  const [loading, setLoading] = useState(false);
   const counterRef = useRef(1);
 
   const handleChange = (key, value) => {
@@ -103,9 +110,26 @@ const RuleConfig = () => {
       response: mockResponse,
     };
 
-    // save
-    const result = await apiRequestUtils.post(SAVE_RULE_ENDPOINT, ruleData);
-    console.log("REsult", result)
+    try {
+      setLoading(true);
+      const result = await apiRequestUtils.post(SAVE_RULE_ENDPOINT, ruleData);
+
+      // update alert for success
+      setAlertData({
+        status: "success",
+        title: "Rule has been created.",
+        description: "Please enable it from dashboard",
+      });
+    } catch (error) {
+      console.error("Error while saving rule data:", error);
+      setAlertData({
+        status: "error",
+        title: error?.response?.data?.message || "Error while saving rule",
+        description: error?.response?.data?.error || "",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const { url, match, method, name, description } = rule;
@@ -113,122 +137,148 @@ const RuleConfig = () => {
 
   return (
     <Flex alignItems="center" flexDirection="column">
-      <Box bg="brand.surface" p={5} borderRadius={5} width={"50%"} m={2}>
-        <InputWithLabel
-          label="Name"
-          value={name}
-          onChange={(e) => handleChange("name", e?.target?.value)}
-          placeholder="Enter Rule name"
-          isRequired
-          isInvalid={!name}
-          error="This is required"
-        />
-        <InputWithLabel
-          label="Description"
-          value={description}
-          onChange={(e) => handleChange("description", e?.target?.value)}
-          placeholder="Enter Rule Description"
-          isRequired
-          isInvalid={!description}
-          error="This is required"
-        />
-      </Box>
-      <Box bg="brand.surface" p={5} borderRadius={5} width={"50%"}>
-        <Stack>
-          <RadioGroup
-            onChange={(val) => handleChange("method", val)}
-            value={method}
-          >
-            <Flex gap={5} justifyContent="center">
-              {REQUEST_TYPE.map((requestName) => (
-                <Flex gap={2} key={requestName}>
-                  <Radio value={requestName}>{requestName}</Radio>
-                </Flex>
-              ))}
-            </Flex>
-          </RadioGroup>
-          <Flex gap={5}>
+      {loading ? (
+        <Flex
+          justifyContent={"center"}
+          flexDirection={"column"}
+          alignItems={"center"}
+        >
+          <CircularProgress
+            isIndeterminate
+            size="60px"
+            thickness="4px"
+            color="brand.primary"
+          />
+        </Flex>
+      ) : (
+        <>
+          {alertData?.title && (
+            <Alert status={alertData.status}>
+              <AlertIcon />
+              <AlertTitle>{alertData?.title}</AlertTitle>
+              <AlertDescription>
+                {alertData?.description || ""}
+              </AlertDescription>
+            </Alert>
+          )}
+          <Box bg="brand.surface" p={5} borderRadius={5} width={"50%"} m={2}>
             <InputWithLabel
-              label="Url"
-              value={url}
-              onChange={(e) => handleChange("url", e?.target?.value)}
-              placeholder="Enter URL"
+              label="Name"
+              value={name}
+              onChange={(e) => handleChange("name", e?.target?.value)}
+              placeholder="Enter Rule name"
               isRequired
-              isInvalid={!url}
+              isInvalid={!name}
               error="This is required"
             />
-            <SelectWithLabel
-              label="Match"
-              name="match"
-              options={MATCH_OPTIONS}
-              value={match}
-              onChange={(e) => handleChange("match", e?.target?.value)}
+            <InputWithLabel
+              label="Description"
+              value={description}
+              onChange={(e) => handleChange("description", e?.target?.value)}
+              placeholder="Enter Rule Description"
+              isRequired
+              isInvalid={!description}
+              error="This is required"
             />
-          </Flex>
-          <FormControl display="flex" alignItems="center" mb={2}>
-            <FormLabel htmlFor="payload-toggle" mb="0">
-              Match on Payload?
-            </FormLabel>
-            <Switch
-              id="payload-toggle"
-              isChecked={rule.hasPayload}
-              onChange={(e) => handleChange("hasPayload", e.target.checked)}
-              colorScheme="amber"
-            />
-          </FormControl>
-          {rule.hasPayload && (
-            <Box>
-              {rulePayload.map((payload, i) => (
-                <RulePayload
-                  payload={payload}
-                  key={payload.id}
-                  handleRemove={handleRemove}
-                  handlePayloadUpdate={handlePayloadUpdate}
-                  id={payload.id}
-                />
-              ))}
-
-              <Link
-                mt={3}
-                onClick={handleAdd}
-                color={rulePayload.length >= 3 ? "gray.500" : "yellow.400"}
-                pointerEvents={rulePayload.length >= 3 ? "none" : "auto"}
-                fontWeight="medium"
+          </Box>
+          <Box bg="brand.surface" p={5} borderRadius={5} width={"50%"}>
+            <Stack>
+              <RadioGroup
+                onChange={(val) => handleChange("method", val)}
+                value={method}
               >
-                <Flex>
-                  <AddIcon mt={1.5} mr={1} boxSize={3} />
-                  <Text>Add Matcher</Text>
+                <Flex gap={5} justifyContent="center">
+                  {REQUEST_TYPE.map((requestName) => (
+                    <Flex gap={2} key={requestName}>
+                      <Radio value={requestName}>{requestName}</Radio>
+                    </Flex>
+                  ))}
                 </Flex>
-              </Link>
-              {rulePayload.length >= 3 && (
-                <Text color={"yellow.400"}>
-                  You can add up to 3 matchers only.
-                </Text>
-              )}
-            </Box>
-          )}
-        </Stack>
-      </Box>
+              </RadioGroup>
+              <Flex gap={5}>
+                <InputWithLabel
+                  label="Url"
+                  value={url}
+                  onChange={(e) => handleChange("url", e?.target?.value)}
+                  placeholder="Enter URL"
+                  isRequired
+                  isInvalid={!url}
+                  error="This is required"
+                />
+                <SelectWithLabel
+                  label="Match"
+                  name="match"
+                  options={MATCH_OPTIONS}
+                  value={match}
+                  onChange={(e) => handleChange("match", e?.target?.value)}
+                />
+              </Flex>
+              <FormControl display="flex" alignItems="center" mb={2}>
+                <FormLabel htmlFor="payload-toggle" mb="0">
+                  Match on Payload?
+                </FormLabel>
+                <Switch
+                  id="payload-toggle"
+                  isChecked={rule.hasPayload}
+                  onChange={(e) => handleChange("hasPayload", e.target.checked)}
+                  colorScheme="amber"
+                />
+              </FormControl>
+              {rule.hasPayload && (
+                <Box>
+                  {rulePayload.map((payload, i) => (
+                    <RulePayload
+                      payload={payload}
+                      key={payload.id}
+                      handleRemove={handleRemove}
+                      handlePayloadUpdate={handlePayloadUpdate}
+                      id={payload.id}
+                    />
+                  ))}
 
-      <Box bg="brand.surface" p={5} borderRadius={5} width={"50%"}>
-        <Text mb="8px">Response </Text>
-        <Textarea
-          label="Response"
-          value={mockResponse}
-          onChange={handleMockResponse}
-        />
-        <Text mb="8px" color={"brand.danger"} size="lg" rows={8}>
-          {errors.response}
-        </Text>
-      </Box>
-      <Box bg="brand.surface" width={"50%"} p="5" m="2">
-        <Flex justifyContent={"space-between"}>
-          <Button colorScheme="steel">Cancel</Button>
-          <Button ml={3} onClick={handleSubmit}>
-            Submit
-          </Button>
-        </Flex>
-      </Box>
+                  <Link
+                    mt={3}
+                    onClick={handleAdd}
+                    color={rulePayload.length >= 3 ? "gray.500" : "yellow.400"}
+                    pointerEvents={rulePayload.length >= 3 ? "none" : "auto"}
+                    fontWeight="medium"
+                  >
+                    <Flex>
+                      <AddIcon mt={1.5} mr={1} boxSize={3} />
+                      <Text>Add Matcher</Text>
+                    </Flex>
+                  </Link>
+                  {rulePayload.length >= 3 && (
+                    <Text color={"yellow.400"}>
+                      You can add up to 3 matchers only.
+                    </Text>
+                  )}
+                </Box>
+              )}
+            </Stack>
+          </Box>
+
+          <Box bg="brand.surface" p={5} borderRadius={5} width={"50%"}>
+            <Text mb="8px">Response </Text>
+            <Textarea
+              label="Response"
+              value={mockResponse}
+              onChange={handleMockResponse}
+            />
+            <Text mb="8px" color={"brand.danger"} size="lg" rows={8}>
+              {errors.response}
+            </Text>
+          </Box>
+          <Box bg="brand.surface" width={"50%"} p="5" m="2">
+            <Flex justifyContent={"space-between"}>
+              <Button colorScheme="steel">Cancel</Button>
+              <Button ml={3} onClick={handleSubmit}>
+                Submit
+              </Button>
+            </Flex>
+          </Box>
+        </>
+      )}
     </Flex>
   );
 };

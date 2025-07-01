@@ -106,9 +106,7 @@ const Dashboard = () => {
       ) : (
         <Box>
           <Flex pb={2} justifyContent={"space-between"} alignItems="center">
-            <Text
-              // pb={"4"}
-            >{`Showing ${rules?.length} out of ${totalRules} rule(s)`}</Text>
+            <Text>{`Showing ${rules?.length} out of ${totalRules} rule(s)`}</Text>
             <Button colorScheme="steel" onClick={handleFetchActiveRules}>
               Fetch Active Rules
             </Button>

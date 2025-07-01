@@ -10,9 +10,8 @@ const routes = require("./routes");
 const app = express();
 
 // middlewares
-// add body parser middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "5mb" })); // or '10mb', '50mb'
+app.use(express.urlencoded({ limit: "5mb", extended: true }));
 app.use(cors());
 // add request tracking middleware  
 app.use(requestTrackingMiddleware);

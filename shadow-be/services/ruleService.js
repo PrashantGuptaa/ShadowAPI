@@ -42,14 +42,15 @@ const saveRuleService = async (ruleData, email) => {
 
 const fetchActiveRulesToMockService = async (email) => {
   console.log("Fetching active rules for user:", email);
-  // if (!userId) {
-  //   throw new Error("User ID is required to fetch active rules");
-  // }
+  if (!email) {
+    throw new Error("Email is required to fetch active rules");
+  }
   const rules = await Rule.find({
-    // isActive: true,
-    // deleted: false,
-    // createdBy: userId,
+    isActive: true,
+    deleted: false,
+    createdBy: email,
   });
+  console.log("Active rules fetched:", rules.length);
   return rules;
 };
 
