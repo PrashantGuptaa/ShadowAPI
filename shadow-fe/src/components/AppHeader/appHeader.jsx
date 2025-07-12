@@ -2,20 +2,19 @@ import {
   Box,
   Flex,
   Heading,
-  Avatar,
   Spacer,
   Image,
   IconButton,
   Menu,
-  Portal,
-  MenuButton,
   MenuList,
   MenuItem,
 } from "@chakra-ui/react";
 import { FaUserCircle } from "react-icons/fa";
 import logo from "../../assets/shadowGolden.png";
+import { useNavigate } from "react-router";
 
 const AppHeader = () => {
+  const navigate = useNavigate();
   return (
     <div style={{ width: "100%", position: "sticky", top: 0, zIndex: 10000 }}>
       <Box
@@ -25,13 +24,19 @@ const AppHeader = () => {
         boxShadow="inner"
         position="sticky"
         top={0}
-        zIndex={10000}
+        bg="brand.bg"
+        zIndex={1}
       >
         <Flex align="center">
-          {/* Logo and App Name */}
           <Flex align="center" gap={3}>
             <Image src={logo} alt="App Logo" boxSize="40px" />
-            <Heading size="md">ShadowAPI</Heading>
+            <Heading
+              size="md"
+              onClick={() => navigate("/dashboard")}
+              cursor="pointer"
+            >
+              ShadowAPI
+            </Heading>
           </Flex>
 
           <Spacer />
