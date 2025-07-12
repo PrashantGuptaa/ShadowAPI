@@ -42,6 +42,7 @@ window.addEventListener("message", (event) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "INJECT_SCRIPT") {
     console.log("[ShadowAPI] content.js received INJECT_SCRIPT message");
+    
     // fetch rules
     
     injectOverrideScript();

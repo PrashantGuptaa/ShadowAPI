@@ -2,7 +2,6 @@
   console.log("[ShadowAPI] Running injected override from scripting");
 
   // Request rules and set up listener
-  window.postMessage({ type: "FETCH_RULES" }, "*");
   window.postMessage({ type: "GET_RULES" }, "*");
 
   // Listen for rules from the background script
@@ -10,8 +9,7 @@
   window.addEventListener("message", (event) => {
     if (
       event.source === window &&
-      (event.data?.type === "GET_RULES_RESPONSE" ||
-        event.data?.type === "FETCH_RULES_RESPONSE")
+      (event.data?.type === "GET_RULES_RESPONSE")
     ) {
       overrideFetchAndXHR(event.data.rules || []);
     }

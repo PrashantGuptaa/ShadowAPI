@@ -52,12 +52,15 @@ function handleDashboardAndLogin() {
       const authToken = result?.data?.token;
 
       if (!authToken) {
+        // show login form
+        updateStatus(`Please login`);
+        toggleVisibility(elements.loginForm, true);
+        
         throw new Error("No auth token received");
       }
 
       // Store the token in chrome storage
       chrome.storage.local.set({ authToken }, () => {
-        updateStatus(`Welcome, ${result?.data?.name || "User"}!`);
         toggleVisibility(elements.loginForm, false);
         toggleVisibility(elements.toggleExtension, true);
       });

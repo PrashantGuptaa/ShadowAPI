@@ -11,7 +11,7 @@ const storage = {
 };
 
 // Rule management
-async function fetchAndStoreRules() {
+async function fetchAndStoreRules(sendResponse = null) {
   try {
     console.log("[ShadowAPI] Fetching rules from server...");
     const { authToken } = await storage.get("authToken");
@@ -35,6 +35,11 @@ async function fetchAndStoreRules() {
         "Content-Type": "application/json",
       },
     });
+    if (res.status !== 200) {
+      // clear storage
+      storage.clear();
+      return;
+    }
 
     const result = await res.json();
     const rulesFromServer = result?.data || [];
@@ -44,6 +49,7 @@ async function fetchAndStoreRules() {
       "[ShadowAPI] Rules saved to local storage for injection.",
       rulesFromServer
     );
+    if (sendResponse) sendResponse(enabled ? rulesFromServer || [] : []);
   } catch (e) {
     console.error("[ShadowAPI] Failed to fetch rules:", e);
     await storage.clear();
@@ -53,19 +59,9 @@ async function fetchAndStoreRules() {
 // Message handlers
 const messageHandlers = {
   GET_RULES: async (_, sendResponse) => {
+    fetchAndStoreRules(sendResponse);
     const { rules, enabled } = await storage.get(["rules", "enabled"]);
     sendResponse(enabled ? rules || [] : []);
-  },
-
-  FETCH_RULES: async (_, sendResponse) => {
-    try {
-      await fetchAndStoreRules();
-      const { rules, enabled } = await storage.get(["rules", "enabled"]);
-      sendResponse(enabled ? rules || [] : []);
-    } catch (error) {
-      console.error("[ShadowAPI] Error fetching rules:", error);
-      sendResponse({ status: "error", message: error.toString() });
-    }
   },
 
   TOGGLE_EXTENSION: async (message, sendResponse) => {
@@ -73,8 +69,9 @@ const messageHandlers = {
     await storage.set({ enabled: newState });
 
     if (newState) {
-      await fetchAndStoreRules();
-      sendResponse({ status: "enabled_and_rules_fetched" });
+      console.log("[ShadowAPI] Extension enabled by user, fetching rules...");
+      fetchAndStoreRules();
+      sendResponse({ status: "enabled_and_rules_fetch_started" });
     } else {
       await storage.remove("rules");
       console.log("[ShadowAPI] Rules cleared from local storage");
