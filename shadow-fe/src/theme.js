@@ -5,12 +5,21 @@ export const charcoalGoldenTheme = extendTheme({
   styles: {
     global: {
       body: {
+        minHeight: "100vh",
         bg: "#121212", // Charcoal Gray
         color: "#F5F5F5", // Light Text
+        fontFamily: "Arial, Helvetica, sans-serif",
+        display: 'block'
       },
       html: {
+        height: "100%",
         bg: "#121212", // Ensure html is also dark
         color: "#F5F5F5", // Light Text
+      },
+      "#root": {
+        bg: "#121212", // Charcoal Gray
+        color: "#F5F5F5", // Light Text
+        height: "100%",
       },
     },
   },

@@ -22,6 +22,9 @@ import {
 } from "../../utils/apiEndpoints";
 import ApiRequestUtils from "../../utils/apiRequestUtils";
 import { RULE_DASHBOARD_COLUMNS } from "./dashboard.config";
+import { useNavigate, Link } from "react-router";
+import Pagination from "../../components/Pagination";
+
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
@@ -31,6 +34,7 @@ const Dashboard = () => {
   });
   const [rules, setRules] = useState([]);
   const [totalRules, setTotalRules] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,9 +43,15 @@ const Dashboard = () => {
         const response = await ApiRequestUtils.get(
           FETCH_RULES_ENDPOINT(pagination.currentPage, pagination.pageSize)
         );
-        console.log("Response:", response);
         setRules(response.data?.data?.rules || []);
         setTotalRules(response.data?.data?.totalCount || 0);
+        const paginationCopy = {
+          ...pagination,
+          totalPages: Math.ceil(
+            (response.data?.data?.totalCount || 1) / pagination.pageSize
+          ),
+        };
+        setPagination(paginationCopy);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -49,7 +59,7 @@ const Dashboard = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [pagination.currentPage]);
 
   const handleActiveToggle = async (ruleId, isActive) => {
     try {
@@ -63,7 +73,6 @@ const Dashboard = () => {
         r.ruleId === ruleId ? { ...r, isActive: rule.isActive } : r
       );
       setRules(updatedRules);
-      console.log("F-2 Response", response);
     } catch (error) {
       console.error("Error updating rule status:", error);
     } finally {
@@ -71,14 +80,11 @@ const Dashboard = () => {
     }
   };
 
-  const handleFetchActiveRules = async () => {
-    try {
-      const response = await ApiRequestUtils.get(FETCH_ACTIVE_RULES_ENDPOINT);
-      console.log("Active rules", response);
-    } catch (e) {
-      console.error("Error fetching active rules:", e);
-    }
-  };
+  const handlePageChange = (currentPage) => {
+    const paginationCopy = { ...pagination, currentPage };
+    setPagination(paginationCopy);
+  }
+
   return (
     <Box
       bg="brand.surface"
@@ -105,10 +111,10 @@ const Dashboard = () => {
         </Flex>
       ) : (
         <Box>
-          <Flex pb={2} justifyContent={"space-between"} alignItems="center">
+          <Flex pb={4} justifyContent={"space-between"} alignItems="center">
             <Text>{`Showing ${rules?.length} out of ${totalRules} rule(s)`}</Text>
-            <Button colorScheme="steel" onClick={handleFetchActiveRules}>
-              Fetch Active Rules
+            <Button onClick={() => navigate("/rule-config")}>
+              Create new rule
             </Button>
           </Flex>
 
@@ -123,7 +129,7 @@ const Dashboard = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {rules.map((rule) => {
+              {rules.map((rule, i) => {
                 const {
                   name,
                   description,
@@ -135,8 +141,12 @@ const Dashboard = () => {
                   ruleId,
                 } = rule;
                 return (
-                  <Tr>
-                    <Td color="brand.text">{name}</Td>
+                  <Tr key={i}>
+                    <Td color="brand.text">
+                      <Link to={`/rule-config/${ruleId}`} colorScheme="amber">
+                        {name}
+                      </Link>
+                    </Td>
                     <Td color="brand.text">{description.slice(0, 40)}</Td>
                     <Td color={"brand.text"}>{method}</Td>
                     <Td color={"brand.text"}>{url}</Td>
@@ -159,6 +169,7 @@ const Dashboard = () => {
               })}
             </Tbody>
           </Table>
+          <Pagination currentPage={pagination.currentPage} totalPages={pagination.totalPages} onPageChange={handlePageChange}/>
         </Box>
       )}
     </Box>

@@ -64,14 +64,52 @@ const updateRuleStatusService = async (ruleId, isActive, email) => {
     { new: true }
   );
   if (!rule) {
-    throw new AppError("Rule not found or you do not have permission to update it", 404);
+    throw new AppError(
+      "Rule not found or you do not have permission to update it",
+      404
+    );
   }
   return rule;
-}
+};
+
+const getRuleByIdService = async (ruleId, email) => {
+  if (!ruleId || !email) {
+    throw new AppError("Rule ID and email are required", 400);
+  }
+  const rule = await Rule.findOne({ ruleId, createdBy: email, deleted: false });
+  if (!rule) {
+    throw new AppError(
+      "Rule not found or you do not have permission to access it",
+      404
+    );
+  }
+  return rule;
+};
+
+const updateRuleByIdService = async (ruleId, email, ruleDetailsToUpdate) => {
+  if (!ruleId || !email) {
+    throw new AppError("Rule ID and email are required", 400);
+  }
+  // updating the rule
+  const updatedRule = await Rule.findOneAndUpdate(
+    { ruleId, createdBy: email, deleted: false },
+    { ...ruleDetailsToUpdate, updatedBy: email, isActive: false },
+    { new: true }
+  );
+  if (!updatedRule) {
+    throw new AppError(
+      "Rule not found or you do not have permission to update it",
+      404
+    );
+  }
+  return updatedRule;
+};
 
 module.exports = {
   getRulesByEmailService,
   saveRuleService,
   fetchActiveRulesToMockService,
   updateRuleStatusService,
+  getRuleByIdService,
+  updateRuleByIdService,
 };

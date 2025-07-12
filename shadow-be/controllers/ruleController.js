@@ -3,6 +3,8 @@ const {
   saveRuleService,
   fetchActiveRulesToMockService,
   updateRuleStatusService,
+  getRuleByIdService,
+  updateRuleByIdService,
 } = require("../services/ruleService");
 const { sendSuccess, sendError } = require("../utils/response");
 
@@ -65,7 +67,11 @@ const getActiveRulesToMockController = async (req, res) => {
 const updateRuleStatusController = async (req, res) => {
   try {
     const { ruleId, isActive } = req.body;
-    const data = await updateRuleStatusService(ruleId, isActive, req.user?.email);
+    const data = await updateRuleStatusService(
+      ruleId,
+      isActive,
+      req.user?.email
+    );
     sendSuccess(res, {
       message: "Rule status updated successfully",
       data,
@@ -78,9 +84,50 @@ const updateRuleStatusController = async (req, res) => {
   }
 };
 
+const getRuleByIdController = async (req, res) => {
+  try {
+    const { ruleId } = req.params;
+    const email = req.user?.email;
+    const rule = await getRuleByIdService(ruleId, email);
+    sendSuccess(res, {
+      data: rule,
+      message: "Rule fetched successfully",
+    });
+  } catch (error) {
+    sendError(res, {
+      message: "Error fetching rule",
+      err: error,
+    });
+  }
+};
+
+const updateRuleByIdController = async (req, res) => {
+  try {
+    const { ruleId } = req.params;
+    const email = req.user?.email;
+    const ruleDetailsToUpdate = req.body;
+    const updatedRule = await updateRuleByIdService(
+      ruleId,
+      email,
+      ruleDetailsToUpdate
+    );
+    sendSuccess(res, {
+      data: updatedRule,
+      message: "Rule updated successfully",
+    });
+  } catch (error) {
+    sendError(res, {
+      message: "Error updating rule",
+      err: error,
+    });
+  }
+};
+
 module.exports = {
   fetchRulesController,
   saveRuleController,
   getActiveRulesToMockController,
   updateRuleStatusController,
+  getRuleByIdController,
+  updateRuleByIdController,
 };

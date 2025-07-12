@@ -19,6 +19,8 @@ function App() {
 
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/rule-config" element={<RuleConfig />} />
+        <Route path="/rule-config/:ruleId" element={<RuleConfig />} />
+
         <Route path="/verify-email" element={<EmailVerification />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
