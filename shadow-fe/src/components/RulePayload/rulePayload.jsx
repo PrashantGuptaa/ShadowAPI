@@ -4,27 +4,39 @@ import InputWithLabel from "../InputWithLabel/inputWithLabel";
 import SelectWithLabel from "../SelectWithLabel";
 // import { PAYLOAD_CONFIG } from "./config";
 
-const RulePayload = ({ handlePayloadUpdate, handleRemove, id, payload }) => {
+const RulePayload = ({
+  handlePayloadUpdate,
+  handleRemove,
+  id,
+  payload,
+}) => {
+  const { key = "", value = "", matcher } = payload || {};
   return (
     <Box>
       <Flex gap="5" justifyContent={"center"}>
         <InputWithLabel
           label="Key"
           placeholder="Enter payload key"
-          value={payload?.key || ""}
+          value={key}
           onChange={(e) => handlePayloadUpdate(id, "key", e?.target?.value)}
+          isRequired
+          isInvalid={!key}
+          error="This is required"
         />
         <SelectWithLabel
           label="Match"
           options={PAYLOAD_CONFIG}
-          value={payload.matcher}
+          value={matcher}
           onChange={(e) => handlePayloadUpdate(id, "matcher", e?.target?.value)}
         />
         <InputWithLabel
           label="Value"
           placeholder="Enter Value"
           onChange={(e) => handlePayloadUpdate(id, "value", e?.target?.value)}
-          value={payload.value}
+          value={value}
+          isRequired
+          isInvalid={!value}
+          error="This is required"
         />
         <Link
           mt={10}

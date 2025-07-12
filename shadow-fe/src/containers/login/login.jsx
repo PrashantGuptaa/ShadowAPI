@@ -11,7 +11,7 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
-import { Link as RouterLink } from "react-router";
+import { Link as RouterLink, useNavigate } from "react-router";
 import InputWithLabel from "../../components/InputWithLabel/inputWithLabel";
 import { isValidEmail, isValidPassword } from "../../utils/validationUtils";
 import apiRequestUtils from "../../utils/apiRequestUtils";
@@ -21,6 +21,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
   const toast = useToast();
 
   const handleSubmit = async (e) => {
@@ -52,6 +53,15 @@ export default function LoginPage() {
         password,
       });
       console.log("result", result);
+      localStorage.setItem("authToken", result?.data?.data?.token);
+      toast({
+        title: `Welcome back, ${result?.data?.data?.name || "User"}!`,
+        position: "top",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+      navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error);
       const errorMessage =
