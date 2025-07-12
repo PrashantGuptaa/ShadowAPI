@@ -8,3 +8,7 @@ export const FETCH_RULES_ENDPOINT = (pageNum, pageSize) =>
 export const SAVE_RULE_ENDPOINT = `${API_BASE_URL}rule/create`;
 export const UPDATE_RULE_STATUS_ENDPOINT = `${API_BASE_URL}rule/update-status`;
 export const FETCH_ACTIVE_RULES_ENDPOINT = `${API_BASE_URL}rule/active-rules`;
+export const FETCH_RULE_DETAILS_BY_ID_ENDPOINT = (ruleId) =>
+  `${API_BASE_URL}rule/${ruleId}`;
+export const UPDATE_RULE_BY_ID_ENPOINT = (ruleId) =>
+  `${API_BASE_URL}rule/update/${ruleId}`;
