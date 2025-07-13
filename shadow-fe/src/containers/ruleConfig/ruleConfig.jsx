@@ -27,9 +27,8 @@ import {
   EXACT_MATCH_VAL,
   RULE_PAYLOAD,
 } from "./config";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import RulePayload from "../../components/RulePayload";
-import { useRef } from "react";
 import apiRequestUtils from "../../utils/apiRequestUtils";
 import {
   FETCH_RULE_DETAILS_BY_ID_ENDPOINT,
@@ -37,15 +36,18 @@ import {
   UPDATE_RULE_BY_ID_ENPOINT,
 } from "../../utils/apiEndpoints";
 import { useParams } from "react-router";
-import { useEffect } from "react";
+
+const initialRuleState = {
+  method: "GET",
+  url: "",
+  match: EXACT_MATCH_VAL,
+  hasPayload: false,
+  name: "",
+  description: "",
+};
 
 const RuleConfig = () => {
-  const [rule, setRule] = useState({
-    method: "GET",
-    url: "",
-    match: EXACT_MATCH_VAL,
-    hasPayload: false,
-  });
+  const [rule, setRule] = useState(initialRuleState);
   const [rulePayload, setRulePayload] = useState([]);
   const [mockResponse, setMockResponse] = useState("");
   const [errors, setErrors] = useState({});
@@ -57,8 +59,10 @@ const RuleConfig = () => {
   const ruleId = params?.ruleId || "";
 
   useEffect(() => {
-    fetchRuleDetails();
-  }, []);
+    if (ruleId) {
+      fetchRuleDetails();
+    }
+  }, [ruleId]);
 
   const fetchRuleDetails = async () => {
     if (!ruleId) return;
@@ -69,60 +73,62 @@ const RuleConfig = () => {
       );
       updateState(resp?.data?.data || {});
     } catch (error) {
+      setAlertData({
+        status: "error",
+        title: "Error loading rule",
+        description:
+          error?.response?.data?.message || "Could not load rule details",
+        flexDirection: "row",
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleChange = (key, value) => {
-    const ruleCopy = { ...rule };
-    ruleCopy[key] = value;
-    setRule(ruleCopy);
+    setRule((prevRule) => ({
+      ...prevRule,
+      [key]: value,
+    }));
   };
 
   const handleAdd = () => {
     if (rulePayload.length >= 3) return;
-    const rulePayloadCopy = cloneDeep(rulePayload);
-    rulePayloadCopy.push({ ...RULE_PAYLOAD, id: counterRef.current++ });
-    setRulePayload(rulePayloadCopy);
+    setRulePayload((prevPayload) => [
+      ...prevPayload,
+      { ...RULE_PAYLOAD, id: counterRef.current++ },
+    ]);
   };
 
   const handleRemove = (id) => {
-    const filteredPayload = rulePayload.filter((data) => data.id !== id);
-    setRulePayload(filteredPayload);
+    setRulePayload((prevPayload) =>
+      prevPayload.filter((data) => data.id !== id)
+    );
   };
 
   const handlePayloadUpdate = (id, key, value) => {
-    const updatesRulesPayload = rulePayload.map((payload) => {
-      if (payload.id === id) {
-        return {
-          ...payload,
-          [key]: value,
-        };
-      }
-      return payload;
-    });
-    setRulePayload(updatesRulesPayload);
+    setRulePayload((prevPayload) =>
+      prevPayload.map((payload) =>
+        payload.id === id ? { ...payload, [key]: value } : payload
+      )
+    );
   };
 
   const handleMockResponse = (e) => {
     const res = e.target?.value;
-    const errCopy = { ...errors };
-    errCopy.response = "Invalid JSON";
+    setMockResponse(res);
+
     try {
-      setMockResponse(res);
-      JSON.parse(res);
-      errCopy.response = "";
+      if (res) JSON.parse(res);
+      setErrors((prev) => ({ ...prev, response: "" }));
     } catch (e) {
-      console.error(e);
-    } finally {
-      setErrors(errCopy);
+      setErrors((prev) => ({ ...prev, response: "Invalid JSON" }));
     }
   };
 
   const updateState = (resp = {}) => {
     const {
-      method = "",
+      method = "GET",
       url = "",
       payload = [],
       name = "",
@@ -130,6 +136,7 @@ const RuleConfig = () => {
       match = EXACT_MATCH_VAL,
       response = null,
     } = resp;
+
     setRule({
       name,
       description,
@@ -138,17 +145,23 @@ const RuleConfig = () => {
       match,
       hasPayload: payload?.length > 0,
     });
-    setMockResponse(response);
-    setRulePayload(payload);
+
+    setMockResponse(response || "");
+    setRulePayload(payload.length ? payload : []);
+  };
+
+  const resetForm = () => {
+    setRule(initialRuleState);
+    setRulePayload([]);
+    setMockResponse("");
+    setErrors({});
   };
 
   const createRule = async (ruleData) => {
     try {
       setLoading(true);
-      const result = await apiRequestUtils.post(SAVE_RULE_ENDPOINT, ruleData);
-      // clear form
-      updateRule({});
-      // update alert for success
+      await apiRequestUtils.post(SAVE_RULE_ENDPOINT, ruleData);
+      resetForm();
       setAlertData({
         status: "success",
         title: "Rule has been created.",
@@ -176,8 +189,6 @@ const RuleConfig = () => {
         ruleData
       );
       updateState(resp?.data?.data || {});
-
-      // update alert for success
       setAlertData({
         status: "success",
         title: "Rule has been updated.",
@@ -198,54 +209,46 @@ const RuleConfig = () => {
   };
 
   const validateRule = () => {
-    const errCopy = { ...errors };
-    errCopy.response = "";
+    const newErrors = {};
+
+    // Validate response
     if (!mockResponse) {
-      errCopy.response = "Response is required";
+      newErrors.response = "Response is required";
     } else {
       try {
         JSON.parse(mockResponse);
       } catch (e) {
-        errCopy.response = "Invalid JSON format";
+        newErrors.response = "Invalid JSON format";
       }
     }
-    if (!rule.url) {
-      errCopy.url = "URL is required";
-    } else {
-      errCopy.url = "";
-    }
-    if (!rule.name) {
-      errCopy.name = "Name is required";
-    } else {
-      errCopy.name = "";
-    }
-    if (!rule.description) {
-      errCopy.description = "Description is required";
-    } else {
-      errCopy.description = "";
-    }
+
+    // Validate URL, name, description
+    if (!rule.url) newErrors.url = "URL is required";
+    if (!rule.name) newErrors.name = "Name is required";
+    if (!rule.description) newErrors.description = "Description is required";
+
+    // Validate payload if applicable
     if (rule.hasPayload) {
-      const isValidPayload = rulePayload.every((payload) => {
-        return payload.key && payload.value;
-      });
+      const isValidPayload = rulePayload.every(
+        (payload) => payload.key && payload.value
+      );
       if (!isValidPayload) {
-        errCopy.payload = "All payload matchers must have key and value";
-      } else {
-        errCopy.payload = "";
+        newErrors.payload = "All payload matchers must have key and value";
       }
-    } else {
-      errCopy.payload = "";
     }
-    setErrors(errCopy);
-    const hasErrors = Object.values(errCopy).every((error) => !error);
-    console.log("F-1 errors", hasErrors, errCopy);
-    if (!hasErrors) {
+
+    setErrors(newErrors);
+
+    // Check if there are any errors
+    const hasErrors = Object.values(newErrors).some((error) => !!error);
+
+    if (hasErrors) {
       setAlertData({
         status: "error",
         title: "Please fix the errors before submitting",
         description: (
           <ul style={{ listStyleType: "none", paddingLeft: 0 }}>
-            {Object.entries(errCopy).map(([key, value]) => {
+            {Object.entries(newErrors).map(([key, value]) => {
               if (value) {
                 return <li key={key}>{value}</li>;
               }
@@ -256,18 +259,21 @@ const RuleConfig = () => {
         flexDirection: "column",
       });
     }
-    return hasErrors;
+
+    return !hasErrors;
   };
 
   const handleSubmit = async () => {
     if (!validateRule()) {
       return;
     }
+
     const ruleData = {
       ...rule,
-      payload: rulePayload,
+      payload: rule.hasPayload ? rulePayload : [],
       response: mockResponse,
     };
+
     if (ruleId) {
       updateRule(ruleData);
     } else {
@@ -275,15 +281,15 @@ const RuleConfig = () => {
     }
   };
 
-  const { url, match, method, name, description } = rule;
-  console.log("F-2 errors", errors);
+  const { url, match, method, name, description, hasPayload } = rule;
+
   return (
     <Flex alignItems="center" flexDirection="column">
       {loading ? (
         <Flex
-          justifyContent={"center"}
-          flexDirection={"column"}
-          alignItems={"center"}
+          justifyContent="center"
+          flexDirection="column"
+          alignItems="center"
         >
           <CircularProgress
             isIndeterminate
@@ -300,6 +306,7 @@ const RuleConfig = () => {
               flexDirection={alertData.flexDirection || "row"}
               alignItems="start"
               justifyContent="start"
+              mb={4}
             >
               {alertData.flexDirection === "row" && <AlertIcon />}
               <AlertTitle>{alertData?.title}</AlertTitle>
@@ -308,15 +315,23 @@ const RuleConfig = () => {
               </AlertDescription>
             </Alert>
           )}
-          <Box bg="brand.surface" p={5} borderRadius={5} width={"50%"} m={2}>
+          <Box bg="brand.primary" px={6} py={4} width="50%">
+            <Text fontWeight="bold" fontSize="xl" color="#121212">
+              {ruleId ? "Update Rule" : "+ Create New Rule"}
+            </Text>
+            <Text color="brand.surface">
+              Configure your API mocking rule with the details below
+            </Text>
+          </Box>
+          <Box bg="brand.surface" p={5} borderRadius={5} width="50%" mb={4}>
             <InputWithLabel
               label="Name"
               value={name}
               onChange={(e) => handleChange("name", e?.target?.value)}
               placeholder="Enter Rule name"
               isRequired
-              isInvalid={!name}
-              error="This is required"
+              isInvalid={errors.name}
+              error={errors.name || "This is required"}
             />
             <InputWithLabel
               label="Description"
@@ -324,20 +339,29 @@ const RuleConfig = () => {
               onChange={(e) => handleChange("description", e?.target?.value)}
               placeholder="Enter Rule Description"
               isRequired
-              isInvalid={!description}
-              error="This is required"
+              isInvalid={errors.description}
+              error={errors.description || "This is required"}
             />
           </Box>
-          <Box bg="brand.surface" p={5} borderRadius={5} width={"50%"}>
-            <Stack>
+          <Box
+            bg="brand.surface"
+            px={5}
+            py={4}
+            borderRadius={5}
+            width="50%"
+            mb={4}
+          >
+            <Stack spacing={4}>
               <RadioGroup
                 onChange={(val) => handleChange("method", val)}
                 value={method}
               >
-                <Flex gap={5} justifyContent="center" flexWrap="wrap">
+                <Flex gap={5} flexWrap="wrap">
                   {REQUEST_TYPE.map((requestName) => (
                     <Flex gap={2} key={requestName}>
-                      <Radio value={requestName}>{requestName}</Radio>
+                      <Radio colorScheme="amber" value={requestName}>
+                        {requestName}
+                      </Radio>
                     </Flex>
                   ))}
                 </Flex>
@@ -349,8 +373,8 @@ const RuleConfig = () => {
                   onChange={(e) => handleChange("url", e?.target?.value)}
                   placeholder="Enter URL"
                   isRequired
-                  isInvalid={!url}
-                  error="This is required"
+                  isInvalid={errors.url}
+                  error={errors.url || "This is required"}
                 />
                 <SelectWithLabel
                   label="Match"
@@ -366,12 +390,12 @@ const RuleConfig = () => {
                 </FormLabel>
                 <Switch
                   id="payload-toggle"
-                  isChecked={rule.hasPayload}
+                  isChecked={hasPayload}
                   onChange={(e) => handleChange("hasPayload", e.target.checked)}
                   colorScheme="amber"
                 />
               </FormControl>
-              {rule.hasPayload && (
+              {hasPayload && (
                 <Box>
                   {rulePayload.map((payload) => (
                     <RulePayload
@@ -389,6 +413,7 @@ const RuleConfig = () => {
                     color={rulePayload.length >= 3 ? "gray.500" : "yellow.400"}
                     pointerEvents={rulePayload.length >= 3 ? "none" : "auto"}
                     fontWeight="medium"
+                    display="inline-block"
                   >
                     <Flex>
                       <AddIcon mt={1.5} mr={1} boxSize={3} />
@@ -396,8 +421,13 @@ const RuleConfig = () => {
                     </Flex>
                   </Link>
                   {rulePayload.length >= 3 && (
-                    <Text color={"yellow.400"}>
+                    <Text color="yellow.400" mt={2}>
                       You can add up to 3 matchers only.
+                    </Text>
+                  )}
+                  {errors.payload && (
+                    <Text color="red.500" mt={2}>
+                      {errors.payload}
                     </Text>
                   )}
                 </Box>
@@ -405,21 +435,27 @@ const RuleConfig = () => {
             </Stack>
           </Box>
 
-          <Box bg="brand.surface" p={5} borderRadius={5} width={"50%"}>
-            <Text mb="8px">Response </Text>
+          <Box bg="brand.surface" p={5} borderRadius={5} width="50%" mb={4}>
+            <Text mb={2}>Response</Text>
             <Textarea
-              label="Response"
               value={mockResponse}
               onChange={handleMockResponse}
+              placeholder="Enter mock response"
+              rows={8}
+              isInvalid={!!errors.response}
             />
-            <Text mb="8px" color={"brand.danger"} size="lg" rows={8}>
-              {errors.response}
-            </Text>
+            {errors.response && (
+              <Text color="red.500" mt={2}>
+                {errors.response}
+              </Text>
+            )}
           </Box>
-          <Box bg="brand.surface" width={"50%"} p="5" m="2">
-            <Flex justifyContent={"space-between"}>
-              <Button colorScheme="steel">Cancel</Button>
-              <Button ml={3} onClick={handleSubmit}>
+          <Box bg="brand.surface" width="50%" p={5} mt={2}>
+            <Flex justifyContent="flex-end" gap={3}>
+              <Button colorScheme="steel" onClick={resetForm}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmit} colorScheme="amber">
                 {ruleId ? "Update" : "Create"}
               </Button>
             </Flex>
