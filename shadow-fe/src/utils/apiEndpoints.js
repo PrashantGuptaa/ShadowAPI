@@ -6,6 +6,10 @@ export const LOGIN_ENDPOINT = `${API_BASE_URL}user/login`;
 export const VERIFY_EMAIL_ENDPOINT = `${API_BASE_URL}user/verify-email`;
 export const VALIDATE_AND_ISSUE_TOKEN_ENDPOINT = `${API_BASE_URL}user/me`;
 
+// Google Authentication Endpoint
+export const GOOGLE_AUTH_ENDPOINT = `${API_BASE_URL}auth/google`;
+export const GOOGLE_CALLBACK_ENDPOINT = `${API_BASE_URL}auth/google/callback`;
+
 // Rule Management Endpoints
 export const FETCH_RULES_ENDPOINT = (pageNum, pageSize, type) =>
   `${API_BASE_URL}rule/collection?pageNum=${pageNum}&pageSize=${pageSize}&type=${type}`;

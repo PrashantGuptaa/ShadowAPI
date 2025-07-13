@@ -7,6 +7,7 @@ function generateUserJwtToken(user, expiresIn = "24h") {
     userId: user.userId,
     email: user.email,
     name: user.name,
+    picture: user.picture || null, // Optional field
   };
   const secretKey = process.env.USER_JWT_SECRET;
   const options = { expiresIn }; // Token expiration time

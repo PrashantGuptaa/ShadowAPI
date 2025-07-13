@@ -22,7 +22,8 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: false, // Optional for OAuth users
+      trim: true,
     },
     role: {
       type: String,
@@ -43,10 +44,6 @@ const userSchema = new Schema(
     },
     lastLogin: {
       type: Date,
-      default: null,
-    },
-    profilePicture: {
-      type: String,
       default: null,
     },
     bio: {
@@ -82,6 +79,19 @@ const userSchema = new Schema(
     verificationPhoneLastSent: {
       type: Date,
     },
+    picture: {
+      type: String,
+      default: null,
+    },
+    source: {
+      type: String,
+      enum: ["local", "google", "facebook", "github"],
+      default: "local",
+    },
+    googleId: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -89,7 +99,11 @@ const userSchema = new Schema(
   }
 );
 
-userSchema.plugin(AutoIncrement, { inc_field: "userId" });
+userSchema.plugin(AutoIncrement, {
+  inc_field: "userId",
+  id: "userId_counter", // optional: custom counter ID
+  disable_hooks: false,
+});
 
 const User = model("User", userSchema);
 module.exports = User;

@@ -3,10 +3,8 @@ import {
   Box,
   Flex,
   Heading,
-  Input,
   Button,
   Link as ChakraLink,
-  // Field,
   Stack,
   Text,
   useToast,
@@ -15,7 +13,7 @@ import { Link as RouterLink, useNavigate } from "react-router";
 import InputWithLabel from "../../components/InputWithLabel/inputWithLabel";
 import { isValidEmail, isValidPassword } from "../../utils/validationUtils";
 import apiRequestUtils from "../../utils/apiRequestUtils";
-import { LOGIN_ENDPOINT } from "../../utils/apiEndpoints";
+import { GOOGLE_AUTH_ENDPOINT, LOGIN_ENDPOINT } from "../../utils/apiEndpoints";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -26,9 +24,6 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically handle the login logic, e.g., API call
-    console.log("Email:", email);
-    console.log("Password:", password);
     const updatedErrors = {};
     if (!isValidEmail(email)) {
       updatedErrors.email = true;
@@ -76,15 +71,16 @@ export default function LoginPage() {
       return;
       
     }
+  };
 
- 
+  const handleGoogleLogin = () => {
+    window.location.href = GOOGLE_AUTH_ENDPOINT;
   };
 
   return (
     <Flex
       height="100vh"
       width="100vw"
-      // alignItems="center"
       justifyContent="flex-end"
       bgImage="url('/assets/login2.png')"
       bgSize="cover"
@@ -95,14 +91,13 @@ export default function LoginPage() {
         rounded="md"
         shadow="xl"
         maxW="400px"
-        borderRadius="0"
         w="100%"
         bg="brand.surface"
       >
         <Heading textAlign="center" mb={6} size="lg">
           Welcome Back
         </Heading>
-        <form>
+        <form onSubmit={handleSubmit}>
           <Stack spacing={4}>
             <InputWithLabel
               label="Email"
@@ -113,7 +108,7 @@ export default function LoginPage() {
               placeholder="Enter your email"
               isRequired
               helperText="We'll never share your email."
-              isInvalid={!isValidEmail(email) || errors.email}
+              isInvalid={errors.email}
               error="Please enter a valid email address."
             />
             <InputWithLabel
@@ -125,20 +120,16 @@ export default function LoginPage() {
               placeholder="Enter your password"
               isRequired
               helperText="Password must be 8+ characters, include uppercase, lowercase, number & special character."
-              isInvalid={!isValidPassword(password) || errors.password}
+              isInvalid={errors.password}
               error="Invalid password."
             />
             <Flex justify="flex-end">
               <ChakraLink fontSize="sm">Forgot password?</ChakraLink>
             </Flex>
-            <Button
-              variant="outline"
-              type="submit"
-              width="full"
-              onClick={handleSubmit}
-            >
+            <Button variant="outline" type="submit" width="full">
               Login
             </Button>
+            <Button onClick={handleGoogleLogin}>Continue with Google</Button>
             <Text fontSize="sm">
               Don't have an account?{" "}
               <ChakraLink as={RouterLink} to="/register" fontWeight="medium">

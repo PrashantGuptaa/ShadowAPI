@@ -9,6 +9,7 @@ import EmailVerification from "./containers/emailVerification";
 import Register from "./containers/register";
 import RuleConfig from "./containers/ruleConfig";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AuthSuccess from "./containers/AuthSuccess";
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
         />
 
         <Route path="/verify-email" element={<EmailVerification />} />
+        <Route path="/auth/success" element={<AuthSuccess />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

@@ -1,5 +1,3 @@
-// this will handle the user related operations
-
 const User = require("../models/userModel");
 
 const { sendSuccess, sendError } = require("../utils/response");
@@ -99,7 +97,7 @@ const getUpdatedTokenController = async (req, res) => {
   console.info("Issued new token to:", user?.email);
   sendSuccess(res, {
     message: "Token updated successfully",
-    data: { token },
+    data: { token, ...user },
   });
 };
 

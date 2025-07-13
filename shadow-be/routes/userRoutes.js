@@ -4,6 +4,8 @@ const {
   registerUserController,
   verifyUserEmailController,
   getUpdatedTokenController,
+  authRedirectWithGoogleController,
+  googleCallbackController,
 } = require("../controllers/userController");
 const { validateUser } = require("../middlewares/userMiddleware");
 
