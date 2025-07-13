@@ -12,7 +12,14 @@ import {
   Switch,
   Text,
   Button,
+  Link as ChakraLink,
+  Badge,
+  Input,
+  Icon,
+  HStack,
+  IconButton,
 } from "@chakra-ui/react";
+import { FiSearch, FiUser, FiCalendar } from "react-icons/fi";
 import {
   FETCH_RULES_ENDPOINT,
   UPDATE_RULE_STATUS_ENDPOINT,
@@ -21,6 +28,7 @@ import ApiRequestUtils from "../../utils/apiRequestUtils";
 import { RULE_DASHBOARD_COLUMNS } from "./dashboard.config";
 import { useNavigate, Link } from "react-router";
 import Pagination from "../../components/Pagination";
+import { AddIcon } from "@chakra-ui/icons";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -78,27 +86,28 @@ const Dashboard = () => {
   };
 
   const handlePageChange = (currentPage) => {
-    const paginationCopy = { ...pagination, currentPage };
-    setPagination(paginationCopy);
-  }
+    setPagination({ ...pagination, currentPage });
+  };
+
+  const getMethodBadgeVariant = (method) => {
+    switch (method) {
+      case "POST":
+        return "yellow";
+      case "GET":
+        return "blue";
+      case "PUT":
+        return "purple";
+      case "DELETE":
+        return "red";
+      default:
+        return "gray";
+    }
+  };
 
   return (
-    <Box
-      bg="brand.surface"
-      p={6}
-      borderRadius="lg"
-      boxShadow="md"
-      width="100%"
-      height="100%"
-      alignItems="center"
-      justifyContent="center"
-    >
+    <Box p={6}>
       {loading ? (
-        <Flex
-          justifyContent={"center"}
-          flexDirection={"column"}
-          alignItems={"center"}
-        >
+        <Flex justifyContent="center" alignItems="center">
           <CircularProgress
             isIndeterminate
             size="60px"
@@ -107,66 +116,141 @@ const Dashboard = () => {
           />
         </Flex>
       ) : (
-        <Box>
-          <Flex pb={4} justifyContent={"space-between"} alignItems="center">
-            <Text>{`Showing ${rules?.length} out of ${totalRules} rule(s)`}</Text>
-            <Button onClick={() => navigate("/rule-config")}>
-              Create new rule
+        <Box bg="brand.surface" p={6} borderRadius="lg" boxShadow="xl">
+          <Flex justifyContent="space-between" alignItems="center" mb={4}>
+            <Flex flexDirection="column" gap={1}>
+              <Text fontSize="xl" fontWeight="bold" color="white">
+                API Rules Management
+              </Text>
+              <Text fontSize="sm" color="brand.mutedText">
+                {`Showing ${rules.length || 0}/${totalRules} rule(s)`}
+              </Text>
+            </Flex>
+            <Button
+              colorScheme="amber"
+              onClick={() => navigate("/rule-config")}
+            >
+              <Flex alignItems="center" gap={2}>
+                <AddIcon boxSize={3} /> Create new rule
+              </Flex>
             </Button>
           </Flex>
 
-          <Table variant="simple">
-            <Thead bg="brand.primary">
-              <Tr>
-                {RULE_DASHBOARD_COLUMNS.map((column) => (
-                  <Th key={column} color="#121212">
-                    {column}
-                  </Th>
-                ))}
-              </Tr>
-            </Thead>
-            <Tbody>
-              {rules.map((rule, i) => {
-                const {
-                  name,
-                  description,
-                  method,
-                  url,
-                  isActive,
-                  updatedAt,
-                  updatedBy,
-                  ruleId,
-                } = rule;
-                return (
-                  <Tr key={i}>
-                    <Td color="brand.text">
-                      <Link to={`/rule-config/${ruleId}`} colorScheme="amber">
-                        {name}
-                      </Link>
-                    </Td>
-                    <Td color="brand.text">{description.slice(0, 40)}</Td>
-                    <Td color={"brand.text"}>{method}</Td>
-                    <Td color={"brand.text"}>{url}</Td>
-                    <Td color={"brand.text"}>
-                      <Switch
-                        id="active-toggle"
-                        isChecked={isActive}
-                        onChange={(e) =>
-                          handleActiveToggle(ruleId, e.target.checked)
-                        }
-                        colorScheme="amber"
-                      />
-                    </Td>
-                    <Td color={"brand.text"}>
-                      {new Date(updatedAt).toLocaleDateString()}
-                    </Td>
-                    <Td color={"brand.text"}>{updatedBy}</Td>
-                  </Tr>
-                );
-              })}
-            </Tbody>
-          </Table>
-          <Pagination currentPage={pagination.currentPage} totalPages={pagination.totalPages} onPageChange={handlePageChange}/>
+          <Flex mb={4} gap={3} alignItems="center">
+            <Box flex={1}>
+              <Input
+                placeholder="Search rules by name or description..."
+                bg="brand.topSurface"
+                color="white"
+              />
+            </Box>
+            <Button variant="outlined">All</Button>
+            <Button colorScheme="amber">Active</Button>
+            <Button variant="outlined" colorScheme="topSurface">
+              Inactive
+            </Button>
+          </Flex>
+
+          <Box borderRadius="md" overflowX="auto">
+            <Table variant="simple">
+              <Thead bg="brand.primary">
+                <Tr>
+                  {RULE_DASHBOARD_COLUMNS.map((column) => (
+                    <Th key={column} color="gray.900" fontWeight="bold">
+                      {column}
+                    </Th>
+                  ))}
+                  <Th></Th>
+                </Tr>
+              </Thead>
+              <Tbody bg="brand.surface" color="white">
+                {rules.map((rule) => {
+                  const {
+                    name,
+                    description,
+                    method,
+                    url,
+                    isActive,
+                    updatedAt,
+                    updatedBy,
+                    ruleId,
+                  } = rule;
+                  return (
+                    <Tr key={ruleId} _hover={{ bg: "brand.hover" }}>
+                      <Td>
+                        <ChakraLink
+                          as={Link}
+                          to={`/rule-config/${ruleId}`}
+                          colorScheme="amber"
+                        >
+                          <Text fontWeight="medium">{name}</Text>
+                        </ChakraLink>
+                      </Td>
+                      <Td>{description?.slice(0, 40)}</Td>
+                      <Td>
+                        <Badge
+                          variant="subtle"
+                          colorScheme={getMethodBadgeVariant(method)}
+                        >
+                          {method}
+                        </Badge>
+                      </Td>
+                      <Td>
+                        <Badge
+                          textTransform="none"
+                          variant="subtle"
+                          colorScheme="white"
+                        >
+                          {url}
+                        </Badge>
+                      </Td>
+                      <Td>
+                        <HStack spacing={3}>
+                          <Switch
+                            isChecked={isActive}
+                            onChange={(e) =>
+                              handleActiveToggle(ruleId, e.target.checked)
+                            }
+                            colorScheme="amber"
+                          />
+                          <Text fontSize="sm">
+                            {isActive ? "Active" : "Inactive"}
+                          </Text>
+                        </HStack>
+                      </Td>
+                      <Td>
+                        <HStack spacing={1}>
+                          <Icon as={FiCalendar} />
+                          <Text fontSize="sm">
+                            {new Date(updatedAt).toLocaleDateString()}
+                          </Text>
+                        </HStack>
+                      </Td>
+                      <Td>
+                        <HStack spacing={1}>
+                          <Icon as={FiUser} />
+                          <Text fontSize="sm">{updatedBy}</Text>
+                        </HStack>
+                      </Td>
+                      <Td>
+                        <IconButton
+                          variant="ghost"
+                          icon={<Text>...</Text>}
+                          aria-label="More actions"
+                        />
+                      </Td>
+                    </Tr>
+                  );
+                })}
+              </Tbody>
+            </Table>
+          </Box>
+
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            onPageChange={handlePageChange}
+          />
         </Box>
       )}
     </Box>

@@ -3,7 +3,7 @@ export const RULE_DASHBOARD_COLUMNS = [
   "Description",
   "Method",
   "URL",
-  "Active",
-  "Last Updated At",
-  "Last Updated By",
+  "Status",
+  "Last Updated",
+  "Updated By",
 ];

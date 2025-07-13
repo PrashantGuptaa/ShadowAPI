@@ -8,6 +8,7 @@ import {
   Menu,
   MenuList,
   MenuItem,
+  MenuButton,
 } from "@chakra-ui/react";
 import { FaUserCircle } from "react-icons/fa";
 import logo from "../../assets/shadowGolden.png";
@@ -15,8 +16,14 @@ import { useNavigate } from "react-router";
 
 const AppHeader = () => {
   const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    localStorage.removeItem("authToken");
+    navigate("/login");
+  };
+
   return (
-    <div style={{ width: "100%", position: "sticky", top: 0, zIndex: 10000 }}>
+    <div style={{ width: "100%", position: "sticky", top: 0, zIndex: 1 }}>
       <Box
         as="header"
         px={6}
@@ -41,12 +48,17 @@ const AppHeader = () => {
 
           <Spacer />
           <Menu>
-            <IconButton borderRadius={"full"} aria-label="Search database">
-              <FaUserCircle />
-            </IconButton>
+            <MenuButton
+              as={IconButton}
+              aria-label="User Menu"
+              icon={<FaUserCircle />}
+              // variant="outline"
+              borderRadius="full"
+              colorScheme="amber"
+            ></MenuButton>
             <MenuList>
               <MenuItem value="profile">Profile</MenuItem>
-              <MenuItem value="sign-out">Sign out</MenuItem>
+              <MenuItem value="sign-out" onClick={handleSignOut}>Sign out</MenuItem>
             </MenuList>
           </Menu>
         </Flex>
