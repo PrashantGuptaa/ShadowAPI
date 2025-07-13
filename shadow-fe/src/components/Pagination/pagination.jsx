@@ -1,12 +1,12 @@
 // Pagination.jsx
 import { Button, HStack, IconButton, Text } from "@chakra-ui/react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import { useMemo } from "react";
+import PropTypes from "prop-types";
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
-      console.log("F-1", currentPage, totalPages)
-  const getPageNumbers = () => {
+  const pageNumbers = useMemo(() => {
     const pages = [];
-
     if (totalPages <= 5) {
       for (let i = 1; i <= totalPages; i++) pages.push(i);
     } else {
@@ -24,29 +24,33 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     }
 
     return pages;
-  };
+  }, [currentPage, totalPages]);
 
   return (
-    <HStack spacing={2} justify="center" mt={4}>
+    <HStack spacing={2} justify="center" mt={4} aria-label="Pagination">
       <IconButton
         icon={<ChevronLeftIcon />}
         aria-label="Previous Page"
-        onClick={() => onPageChange(currentPage - 1)}
+        onClick={() => {
+          if (currentPage > 1) onPageChange(currentPage - 1);
+        }}
         isDisabled={currentPage === 1}
         size="sm"
       />
-      {getPageNumbers().map((page, idx) =>
+      {pageNumbers.map((page, idx) =>
         page === "..." ? (
-          <Text key={idx} px={2}>
+          <Text key={`ellipsis-${idx}`} px={2}>
             ...
           </Text>
         ) : (
           <Button
-            key={page}
+            key={`page-${page}`}
             size="sm"
             variant={page === currentPage ? "solid" : "outline"}
             colorScheme="brand"
             onClick={() => onPageChange(page)}
+            aria-current={page === currentPage ? "page" : undefined}
+            aria-label={`Page ${page}`}
           >
             <Text color="brand.text">{page}</Text>
           </Button>
@@ -55,12 +59,20 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       <IconButton
         icon={<ChevronRightIcon />}
         aria-label="Next Page"
-        onClick={() => onPageChange(currentPage + 1)}
+        onClick={() => {
+          if (currentPage < totalPages) onPageChange(currentPage + 1);
+        }}
         isDisabled={currentPage === totalPages}
         size="sm"
       />
     </HStack>
   );
+};
+
+Pagination.propTypes = {
+  currentPage: PropTypes.number.isRequired,
+  totalPages: PropTypes.number.isRequired,
+  onPageChange: PropTypes.func.isRequired,
 };
 
 export default Pagination;

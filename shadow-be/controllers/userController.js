@@ -8,6 +8,7 @@ const {
   loginUserService,
   verifyEmailService,
 } = require("../services/userService");
+const { generateUserJwtToken } = require("../utils/jwtUtils");
 
 const getUserController = async (req, res) => {
   try {
@@ -91,9 +92,21 @@ const verifyUserEmailController = async (req, res) => {
   }
 };
 
+const getUpdatedTokenController = async (req, res) => {
+  // Generate a new JWT token for the user
+  const user = req?.user; // Assuming user is set in the request by authentication middleware
+  const token = generateUserJwtToken(user, "24h");
+  console.info("Issued new token to:", user?.email);
+  sendSuccess(res, {
+    message: "Token updated successfully",
+    data: { token },
+  });
+};
+
 module.exports = {
   getUserController,
   registerUserController,
   loginUserController,
   verifyUserEmailController,
+  getUpdatedTokenController,
 };

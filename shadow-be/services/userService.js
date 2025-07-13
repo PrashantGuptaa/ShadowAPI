@@ -10,12 +10,11 @@ const {
 
 const { sendEmailService } = require("./emailService");
 const AppError = require("../utils/appError");
+const { isValidPassword, isValidEmail } = require("../utils/helperFunc");
 const {
-  isValidPassword,
-  isValidEmail,
   generateUserJwtToken,
   verifyUserJwtToken,
-} = require("../utils/helperFunc");
+} = require("../utils/jwtUtils");
 
 const registerUserService = async (userData) => {
   console.info("Registering user with data:", userData);

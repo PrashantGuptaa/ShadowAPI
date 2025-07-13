@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import {
   Box,
   CircularProgress,
-  CircularProgressLabel,
   Flex,
   Table,
   Thead,
@@ -10,13 +9,11 @@ import {
   Tr,
   Th,
   Td,
-  Heading,
   Switch,
   Text,
   Button,
 } from "@chakra-ui/react";
 import {
-  FETCH_ACTIVE_RULES_ENDPOINT,
   FETCH_RULES_ENDPOINT,
   UPDATE_RULE_STATUS_ENDPOINT,
 } from "../../utils/apiEndpoints";

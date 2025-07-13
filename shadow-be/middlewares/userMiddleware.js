@@ -1,4 +1,4 @@
-const { verifyUserJwtToken } = require("../utils/helperFunc");
+const { verifyUserJwtToken } = require("../utils/jwtUtils");
 
 const validateUser = (req, res, next) => {
   // Middleware to validate user data
