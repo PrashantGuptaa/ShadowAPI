@@ -9,16 +9,19 @@ import {
   MenuList,
   MenuItem,
   MenuButton,
+  Avatar,
 } from "@chakra-ui/react";
 import { FaUserCircle } from "react-icons/fa";
 import logo from "../../assets/shadowGolden.png";
 import { useNavigate } from "react-router";
+import { clearLocalStorage } from "../../utils/commonUtils";
 
 const AppHeader = () => {
   const navigate = useNavigate();
 
   const handleSignOut = () => {
-    localStorage.removeItem("authToken");
+    clearLocalStorage();
+
     navigate("/login");
   };
 
@@ -45,20 +48,27 @@ const AppHeader = () => {
               ShadowAPI
             </Heading>
           </Flex>
-
           <Spacer />
           <Menu>
             <MenuButton
               as={IconButton}
               aria-label="User Menu"
-              icon={<FaUserCircle />}
-              // variant="outline"
+              icon={
+                <Avatar
+                  size="sm"
+                  name={localStorage.getItem("name")} // fallback initials if no image
+                  src={localStorage.getItem("picture")} // user.profile picture URL
+                  bg="brand.primary" // matches your theme
+                />
+              }
               borderRadius="full"
-              colorScheme="amber"
-            ></MenuButton>
+              variant="ghost"
+            />
             <MenuList>
               <MenuItem value="profile">Profile</MenuItem>
-              <MenuItem value="sign-out" onClick={handleSignOut}>Sign out</MenuItem>
+              <MenuItem value="sign-out" onClick={handleSignOut}>
+                Sign out
+              </MenuItem>
             </MenuList>
           </Menu>
         </Flex>
