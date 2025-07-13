@@ -7,8 +7,8 @@ export const VERIFY_EMAIL_ENDPOINT = `${API_BASE_URL}user/verify-email`;
 export const VALIDATE_AND_ISSUE_TOKEN_ENDPOINT = `${API_BASE_URL}user/me`;
 
 // Rule Management Endpoints
-export const FETCH_RULES_ENDPOINT = (pageNum, pageSize) =>
-  `${API_BASE_URL}rule/collection?pageNum=${pageNum}&pageSize=${pageSize}`;
+export const FETCH_RULES_ENDPOINT = (pageNum, pageSize, type) =>
+  `${API_BASE_URL}rule/collection?pageNum=${pageNum}&pageSize=${pageSize}&type=${type}`;
 export const SAVE_RULE_ENDPOINT = `${API_BASE_URL}rule/create`;
 export const UPDATE_RULE_STATUS_ENDPOINT = `${API_BASE_URL}rule/update-status`;
 export const FETCH_ACTIVE_RULES_ENDPOINT = `${API_BASE_URL}rule/active-rules`;

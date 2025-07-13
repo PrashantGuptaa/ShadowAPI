@@ -10,13 +10,14 @@ const { sendSuccess, sendError } = require("../utils/response");
 
 const fetchRulesController = async (req, res) => {
   try {
-    const { pageSize, pageNum } = req.query;
+    const { pageSize, pageNum, type='all' } = req.query;
 
     const email = req.user?.email;
     const result = await getRulesByEmailService(
       email,
       parseInt(pageNum) || 1,
-      parseInt(pageSize) || 20
+      parseInt(pageSize) || 20,
+      type
     );
     sendSuccess(res, {
       data: result,

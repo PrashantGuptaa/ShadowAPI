@@ -30,6 +30,12 @@ import { useNavigate, Link } from "react-router";
 import Pagination from "../../components/Pagination";
 import { AddIcon } from "@chakra-ui/icons";
 
+const BTN_STATE = {
+  ALL: "all",
+  ACTIVE: "active",
+  INACTIVE: "inactive",
+};
+
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
@@ -39,6 +45,7 @@ const Dashboard = () => {
   });
   const [rules, setRules] = useState([]);
   const [totalRules, setTotalRules] = useState(0);
+  const [activeBtn, setActiveBtn] = useState(BTN_STATE.ALL); // "all", "active", "inactive"
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,7 +53,7 @@ const Dashboard = () => {
       setLoading(true);
       try {
         const response = await ApiRequestUtils.get(
-          FETCH_RULES_ENDPOINT(pagination.currentPage, pagination.pageSize)
+          FETCH_RULES_ENDPOINT(pagination.currentPage, pagination.pageSize, activeBtn)
         );
         setRules(response.data?.data?.rules || []);
         setTotalRules(response.data?.data?.totalCount || 0);
@@ -64,7 +71,7 @@ const Dashboard = () => {
       }
     };
     fetchData();
-  }, [pagination.currentPage]);
+  }, [pagination.currentPage, activeBtn]);
 
   const handleActiveToggle = async (ruleId, isActive) => {
     try {
@@ -76,7 +83,7 @@ const Dashboard = () => {
       const rule = response?.data?.data;
       const updatedRules = rules.map((r) =>
         r.ruleId === ruleId ? { ...r, isActive: rule.isActive } : r
-      );
+      ).filter((r) => activeBtn === "all" || (activeBtn === "active" && r.isActive) || (activeBtn === "inactive" && !r.isActive));
       setRules(updatedRules);
     } catch (error) {
       console.error("Error updating rule status:", error);
@@ -102,6 +109,18 @@ const Dashboard = () => {
       default:
         return "gray";
     }
+  };
+
+  const getBtnProps = (btnType) => {
+    return {
+      variant: activeBtn === btnType ? "solid" : "outlined",
+      colorScheme: activeBtn === btnType ? "amber" : null,
+      color: activeBtn !== btnType ? "brand.mutedText" : "#121212",
+      onClick: () => {
+        setActiveBtn(btnType);
+        setPagination({ ...pagination, currentPage: 1 });
+      },
+    };
   };
 
   return (
@@ -144,11 +163,9 @@ const Dashboard = () => {
                 color="white"
               />
             </Box>
-            <Button variant="outlined">All</Button>
-            <Button colorScheme="amber">Active</Button>
-            <Button variant="outlined" colorScheme="topSurface">
-              Inactive
-            </Button>
+            <Button {...getBtnProps(BTN_STATE.ALL)}>All</Button>
+            <Button {...getBtnProps(BTN_STATE.ACTIVE)}>Active</Button>
+            <Button {...getBtnProps(BTN_STATE.INACTIVE)}>Inactive</Button>
           </Flex>
 
           <Box borderRadius="md" overflowX="auto">

@@ -114,7 +114,10 @@ export const charcoalGoldenTheme = extendTheme({
       variants: {
         solid: (props) => ({
           bg: `${props.colorScheme}.500`,
-          color: props.colorScheme === "steel" ? "#FFFFFF" : "#121212",
+          color:
+            props.color ? props.color : props.colorScheme === "steel"
+              ? "#FFFFFF"
+              : "#121212",
           _hover: {
             bg: `${props.colorScheme}.600`,
           },

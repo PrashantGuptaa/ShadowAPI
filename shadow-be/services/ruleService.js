@@ -1,14 +1,14 @@
 const Rule = require("../models/ruleModel");
 const AppError = require("../utils/appError");
 
-const getRulesByEmailService = async (email, pageNum = 1, pageSize = 20) => {
+const getRulesByEmailService = async (email, pageNum = 1, pageSize = 10, type) => {
   console.log("Fetching rules for user:", email);
   if (!email) {
     throw new AppError("Email is required to fetch rules", 400);
   }
   const offset = (pageNum - 1) * pageSize;
   const rules = await Rule.find(
-    { deleted: false, createdBy: email },
+    { deleted: false, createdBy: email, ...(type !== 'all' && { isActive: type === 'active' }) },
     "ruleId name description method url updatedBy updatedAt isActive"
   )
     .skip(offset)
