@@ -14,8 +14,14 @@ function initializePopup() {
     loginButton: document.getElementById("rule-login"),
     email: document.getElementById("email"),
     password: document.getElementById("password"),
-    toggleBtn: document.getElementById("toggle-extension")
+    toggleBtn: document.getElementById("toggle-extension"),
+    openDashboardLink: document.getElementById("open-dashboard-link"),
   };
+
+  // Set up the dashboard link
+  if (elements.openDashboardLink) {
+    elements.openDashboardLink.href = CONFIG.UI_URL + "/dashboard";
+  }
 
   // Storage helper
   const storage = {
