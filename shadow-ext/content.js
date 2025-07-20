@@ -48,6 +48,7 @@ window.addEventListener("message", (event) => {
           rules: [],
           requestId: event.data.requestId || null,
           error: "Extension context invalid",
+          enabled: false,
         },
         "*"
       );
