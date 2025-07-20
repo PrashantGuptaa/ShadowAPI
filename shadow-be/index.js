@@ -14,7 +14,7 @@ app.use(express.json({ limit: "5mb" })); // or '10mb', '50mb'
 app.use(express.urlencoded({ limit: "5mb", extended: true }));
 app.use(
   cors({
-    origin: [process.env.UI_URL, process.env.CHROME_EXTENSION_ID], // Allow requests from the UI URL
+    origin: [process.env.FE_APP_URL, process.env.CHROME_EXTENSION_ID], // Allow requests from the UI URL
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true, // Allow cookies to be sent with requests
   })
