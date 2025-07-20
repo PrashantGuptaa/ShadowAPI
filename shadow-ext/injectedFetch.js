@@ -9,7 +9,8 @@
   window.addEventListener("message", (event) => {
     if (
       event.source === window &&
-      (event.data?.type === "GET_RULES_RESPONSE")
+      event.data?.type === "GET_RULES_RESPONSE" &&
+      event.data?.enabled
     ) {
       const rules = event.data.rules || [];
       console.log(
@@ -19,7 +20,9 @@
       );
       // Override fetch and XHR with the provided rules
       if (rules.length === 0) {
-        console.warn("[ShadowAPI] No rules provided, fetch/XHR will not be mocked");
+        console.warn(
+          "[ShadowAPI] No rules provided, fetch/XHR will not be mocked"
+        );
         return;
       }
       overrideFetchAndXHR(event.data.rules || []);
@@ -46,7 +49,13 @@
     let bodyMatch = true;
     const rulePayload = Array.isArray(rulePayloadRaw) ? rulePayloadRaw : [];
 
-    if (rulePayload.length > 0 && body && !["GET", "DELETE"].includes(method)) {
+    if (
+      urlMatch &&
+      methodMatch &&
+      rulePayload.length > 0 &&
+      body &&
+      !["GET", "DELETE"].includes(method)
+    ) {
       try {
         const parsedBody = typeof body === "string" ? JSON.parse(body) : body;
 
@@ -66,7 +75,13 @@
           }
         });
       } catch (error) {
-        console.error("[ShadowAPI] Error checking payload match:", error);
+        console.error(
+          `[ShadowAPI] Payload match error for rule URL: ${ruleUrl}, request URL: ${url}, method: ${method}, body: ${body}`,
+          "Rule payload:",
+          rulePayloadRaw,
+          "Error:",
+          error
+        );
         bodyMatch = false;
       }
     }

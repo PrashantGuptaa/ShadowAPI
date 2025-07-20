@@ -23,7 +23,7 @@ injectOverrideScript();
 
 // Helper function to check if extension context is still valid
 function isExtensionContextValid() {
-  return typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id;
+  return typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.id;
 }
 
 // Listen for messages from the page (injected script asking for rules)
@@ -47,38 +47,42 @@ window.addEventListener("message", (event) => {
           type: "GET_RULES_RESPONSE",
           rules: [],
           requestId: event.data.requestId || null,
-          error: "Extension context invalid"
+          error: "Extension context invalid",
         },
         "*"
       );
       return;
     }
-    
-    chrome.runtime.sendMessage({ type: "GET_RULES" }, (rules = []) => {
-      try {
-        debug(`Received ${rules.length} rules from background`);
-        window.postMessage(
-          {
-            type: "GET_RULES_RESPONSE",
-            rules: rules,
-            requestId: event.data.requestId || null,
-            error: null
-          },
-          "*"
-        );
-      } catch (error) {
-        console.error("[ShadowAPI] Error sending rules to page:", error);
-        window.postMessage(
-          {
-            type: "GET_RULES_RESPONSE",
-            rules: [],
-            requestId: event.data.requestId || null,
-            error: error.message
-          },
-          "*"
-        );
+
+    chrome.runtime.sendMessage(
+      { type: "GET_RULES" },
+      ({ rules = [], enabled }) => {
+        try {
+          debug(`Received rules from background`, rules);
+          window.postMessage(
+            {
+              type: "GET_RULES_RESPONSE",
+              rules: rules,
+              requestId: event.data.requestId || null,
+              error: null,
+              enabled,
+            },
+            "*"
+          );
+        } catch (error) {
+          console.error("[ShadowAPI] Error sending rules to page:", error);
+          window.postMessage(
+            {
+              type: "GET_RULES_RESPONSE",
+              rules: [],
+              requestId: event.data.requestId || null,
+              error: error.message,
+            },
+            "*"
+          );
+        }
       }
-    });
+    );
   } catch (error) {
     console.error("[ShadowAPI] Error getting rules:", error);
   }
@@ -94,7 +98,6 @@ try {
         // fetch rules before injecting script
         chrome.runtime.sendMessage({ type: "GET_RULES" }, (rules = []) => {
           try {
-            console.log("[ShadowAPI] Reinjecting script with " + rules.length + " rules");
             injectOverrideScript();
             sendResponse({ status: "injected", rulesCount: rules.length });
           } catch (error) {

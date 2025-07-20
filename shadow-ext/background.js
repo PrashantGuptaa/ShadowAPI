@@ -12,13 +12,11 @@ const storage = {
 
 // Rule management
 
-
 // Message handlers
 const messageHandlers = {
   GET_RULES: async (_, sendResponse) => {
-    // fetchAndStoreRules(sendResponse);
-    const { rules, enabled } = await storage.get(["rules", "enabled"]);
-    sendResponse(enabled ? rules || [] : []);
+    const { rules = [], enabled } = await storage.get(["rules", "enabled"]);
+    sendResponse(enabled ? { rules, enabled } : []);
   },
 
   TOGGLE_EXTENSION: async (message, sendResponse) => {
@@ -27,7 +25,6 @@ const messageHandlers = {
 
     if (newState) {
       console.log("[ShadowAPI] Extension enabled by user, fetching rules...");
-      // fetchAndStoreRules();
       sendResponse({ status: "enabled_and_rules_fetch_started" });
     } else {
       await storage.remove("rules");
@@ -40,7 +37,6 @@ const messageHandlers = {
 // Event listeners
 chrome.runtime.onInstalled.addListener(() => {
   console.log("[ShadowAPI] Browser Installed");
-  // fetchAndStoreRules();
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
