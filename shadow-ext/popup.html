@@ -53,19 +53,53 @@
             }
 
             #open-dashboard {
-                  background-color: #4A5568;
-                  /* Green */
-                  color: white;
-                  border: none;
-                  text-align: center;
-                  text-decoration: none;
-                  display: inline-block;
                   margin-top: 20px;
                   cursor: pointer;
             }
 
-            #open-dashboard:hover {
-                  background-color: #2D3748;
+            .toggle-switch {
+                  position: relative;
+                  display: inline-block;
+                  width: 44px;
+                  height: 24px;
+            }
+
+            .toggle-switch input {
+                  opacity: 0;
+                  width: 0;
+                  height: 0;
+            }
+
+            .slider {
+                  position: absolute;
+                  cursor: pointer;
+                  top: 0;
+                  left: 0;
+                  right: 0;
+                  bottom: 0;
+                  background-color: #888;
+                  transition: 0.4s;
+                  border-radius: 24px;
+            }
+
+            .slider:before {
+                  position: absolute;
+                  content: "";
+                  height: 18px;
+                  width: 18px;
+                  left: 3px;
+                  bottom: 3px;
+                  background-color: white;
+                  transition: 0.4s;
+                  border-radius: 50%;
+            }
+
+            input:checked+.slider {
+                  background-color: #FFC857;
+            }
+
+            input:checked+.slider:before {
+                  transform: translateX(20px);
             }
       </style>
 </head>
@@ -79,14 +113,18 @@
             <button class="ext-button" id="rule-login">Login</button>
       </div>
 
-      <input class="ext-button" type="button" id="toggle-extension" value="Enable" style="transition: 0.5s;" />
-  
+      <label class="toggle-switch" id="toggle-extension-label">
+            <input type="checkbox" id="toggle-extension" checked="false" value="Enable" />
+            <span class="slider"></span>
+      </label>
+      <!-- <input class="ext-button" type="button" id="toggle-extension" value="Enable" style="transition: 0.5s;" /> -->
 
-      <button class="ext-button" id="open-dashboard">
-            <a href="http://localhost:5173/dashboard" target="_blank" style="text-decoration: none; color: inherit;">
+
+      <a href="http://localhost:5173/dashboard" target="_blank" style="text-decoration: none; color: inherit; width: 100%;">
+            <button class="ext-button" id="open-dashboard">
                   Open Dashboard
-            </a>
-      </button>
+            </button>
+      </a>
       <p id="status"></p>
       <div id="extension-status"></div>
 

@@ -11,6 +11,17 @@
       event.source === window &&
       (event.data?.type === "GET_RULES_RESPONSE")
     ) {
+      const rules = event.data.rules || [];
+      console.log(
+        "[ShadowAPI] Overriding network functions with",
+        rules.length,
+        "rules"
+      );
+      // Override fetch and XHR with the provided rules
+      if (rules.length === 0) {
+        console.warn("[ShadowAPI] No rules provided, fetch/XHR will not be mocked");
+        return;
+      }
       overrideFetchAndXHR(event.data.rules || []);
     }
   });
@@ -64,12 +75,6 @@
   }
 
   function overrideFetchAndXHR(rules = []) {
-    console.log(
-      "[ShadowAPI] Overriding network functions with",
-      rules.length,
-      "rules"
-    );
-
     // Override fetch
     const originalFetch = window.fetch;
     window.fetch = async function (input, init = {}) {
