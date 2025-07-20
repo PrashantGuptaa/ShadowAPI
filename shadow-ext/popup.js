@@ -1,3 +1,5 @@
+import { CONFIG } from "./config.js";
+
 document.addEventListener("DOMContentLoaded", () => {
   initializePopup();
 });
@@ -80,7 +82,7 @@ function initializePopup() {
     updateStatus("Logging in...");
 
     try {
-      const res = await fetch("http://localhost:3210/api/v1/user/login", {
+      const res = await fetch(`${CONFIG.API_URL}/user/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -141,7 +143,7 @@ function initializePopup() {
         return;
       }
 
-      const res = await fetch("http://localhost:3210/api/v1/rule/active-rules", {
+      const res = await fetch(`${CONFIG.API_URL}/rule/active-rules`, {
         headers: {
           "auth-token": authToken,
           "Content-Type": "application/json",
