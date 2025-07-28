@@ -165,7 +165,7 @@ const sendVerificationEmailService = async (email) => {
   const token = generateUserJwtToken({ email }, "10m");
   console.info("Generated token for email verification:", token);
 
-  const verificationUrl = `${process.env.FE_APP_URL}verify-email?token=${token}`;
+  const verificationUrl = `${process.env.UI_URL}/verify-email?token=${token}`;
   console.info("Verification URL:", verificationUrl);
   const mailOptions = {
     from: process.env.EMAIL_USER,
