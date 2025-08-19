@@ -15,9 +15,13 @@ const {
   generateUserJwtToken,
   verifyUserJwtToken,
 } = require("../utils/jwtUtils");
+const logger = require("../utils/logger");
 
 const registerUserService = async (userData) => {
-  console.info("Registering user with data:", userData);
+  logger.info("Starting user registration", {
+    email: userData.email,
+    name: userData.name,
+  });
   // Email, username and password are required
   const { email, name, password } = userData;
   if (!email || !name || !password) {
@@ -69,18 +73,23 @@ const registerUserService = async (userData) => {
   try {
     const user = new User(newUser);
     const { _id, userId } = await user.save();
-    console.info("User registered successfully:", _id, userId, user.email);
+    logger.info("User registration completed", {
+      _id,
+      userId,
+      email: user.email,
+      userName,
+    });
     const token = generateUserJwtToken(user, "1h");
     // Send verification email
     await sendVerificationEmailService(email);
     return { token, email, name, userName, userId, _id };
   } catch (error) {
-    throw new AppError("Error registering user: " + error.message, 400);
+    throw new AppError("Error registering user: " + error.message, 400, error);
   }
 };
 
 const loginUserService = async (email, password) => {
-  console.info("Login attempt for email:", email);
+  logger.info("Processing login request", { email });
   if (!email || !password) {
     throw new AppError("Email and password are required", 400);
   }
@@ -106,7 +115,7 @@ const loginUserService = async (email, password) => {
   }
   // If the user exists and the password is valid, return the user data
   const { name, role, userId, userName, _id } = user[0] || {};
-  console.info("User logged in successfully:", email);
+  logger.info("User login completed", { email, userId });
   const token = generateUserJwtToken(user[0], "24h");
   return {
     token,
@@ -120,7 +129,7 @@ const loginUserService = async (email, password) => {
 };
 
 const sendVerificationEmailService = async (email) => {
-  console.info("Sending verification email to:", email);
+  logger.info("Initiating email verification", { email });
   if (!email) {
     throw new AppError("Email is required to send verification email", 401);
   }
@@ -141,12 +150,14 @@ const sendVerificationEmailService = async (email) => {
   const lastSentTime = userExists.verificationEmailLastSent
     ? moment(userExists.verificationEmailLastSent).toDate()
     : null;
-  console.info(
-    "Last sent time for verification email:",
+  logger.debug("Checking verification email timing", {
+    email,
     lastSentTime,
-    "Current time:",
-    currentTime
-  );
+    currentTime,
+    timeDiffMinutes: lastSentTime
+      ? (currentTime - lastSentTime) / (60 * 1000)
+      : null,
+  });
   if (
     lastSentTime &&
     currentTime - lastSentTime < 10 * 60 * 1000 // 10 minutes in milliseconds
@@ -163,10 +174,13 @@ const sendVerificationEmailService = async (email) => {
     { new: true } // Return the updated user
   );
   const token = generateUserJwtToken({ email }, "10m");
-  console.info("Generated token for email verification:", token);
+  logger.debug("Generated verification token", {
+    email,
+    tokenPreview: token.substring(0, 10) + "...",
+  });
 
   const verificationUrl = `${process.env.UI_URL}/verify-email?token=${token}`;
-  console.info("Verification URL:", verificationUrl);
+  logger.debug("Verification URL generated", { email });
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
@@ -181,11 +195,13 @@ const sendVerificationEmailService = async (email) => {
   };
   // Call the email service to send the email
   await sendEmailService(mailOptions);
-  console.info("Verification email sent to:", email);
+  logger.info("Verification email sent successfully", { email });
 };
 
 const verifyEmailService = async (token) => {
-  console.info("Verifying email with token:", token);
+  logger.info("Processing email verification", {
+    tokenPreview: token ? token.substring(0, 10) + "..." : "null",
+  });
   if (!token) {
     throw new AppError("Token is required for email verification", 401);
   }
@@ -197,7 +213,7 @@ const verifyEmailService = async (token) => {
       throw new AppError("Invalid token", 401);
     }
     const { email } = decoded;
-    console.info("Decoded email from token:", email);
+    logger.debug("Token decoded successfully", { email });
 
     // Check if the user exists with the provided email and is not already verified
     const userExists = await User.findOne(
@@ -218,12 +234,15 @@ const verifyEmailService = async (token) => {
       { new: true } // Return the updated user
     );
 
-    console.info("Email verified successfully for user:", user.email);
+    logger.info("Email verification completed", {
+      email: user.email,
+      userId: user.userId,
+    });
     const tokenResponse = generateUserJwtToken(user, "24h");
     return tokenResponse;
   } catch (error) {
-    console.error("Error verifying email:", error);
-    throw new AppError("Invalid or expired token", 401);
+    logger.error("Email verification failed", { error });
+    throw new AppError("Invalid or expired token", 401, error);
   }
 };
 

@@ -4,8 +4,10 @@ const cors = require("cors");
 const path = require("path");
 const mongoose = require("mongoose");
 
-const requestTrackingMiddleware = require("./middlewares");
+const globalErrorHandler = require("./middlewares/errorHandler");
+const requestLogger = require("./middlewares/requestLogger");
 const routes = require("./routes");
+const logger = require("./utils/logger");
 
 const app = express();
 
@@ -19,8 +21,8 @@ app.use(
     credentials: true, // Allow cookies to be sent with requests
   })
 );
-// add request tracking middleware
-app.use(requestTrackingMiddleware);
+// Add request logging middleware (includes payload size tracking)
+app.use(requestLogger);
 app.use("/api/v1", routes);
 
 // Serve static files from /mock-json under the /cdn route
@@ -28,12 +30,24 @@ app.use("/cdn", express.static(path.join(__dirname, "public", "cdn")));
 
 app.get("/", (req, res) => res.status(200).json({ message: "Welcome boss" }));
 
+// Global error handling middleware (must be last)
+app.use(globalErrorHandler);
+
 const PORT = process.env.PORT || 3210;
 
 mongoose
   .connect(process.env.MONGO_DB_URL)
   .then(() => {
-    console.log("MongoDB connected successfully");
-    app.listen(PORT, () => console.log(`App running on ${PORT}`));
+    logger.info("MongoDB connected successfully");
+    app.listen(PORT, () => {
+      logger.info("Server started successfully", {
+        port: PORT,
+        environment: process.env.NODE_ENV || "development",
+        version: require("./package.json").version || "1.0.0",
+      });
+    });
   })
-  .catch((err) => console.error("MongoDB connection error:", err));
+  .catch((err) => {
+    logger.error("MongoDB connection failed", { error: err });
+    process.exit(1);
+  });

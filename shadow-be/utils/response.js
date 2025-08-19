@@ -28,12 +28,22 @@ const sendSuccess = (
   });
 };
 
+const logger = require("./logger");
+
 const sendError = (
   res,
   { message = "Something went wrong", statusCode, err = {}, data = null } = {}
 ) => {
   const error = err.message || err.toString?.() || "Unknown error";
-  console.error("Error:", err);
+
+  // Use the new logger for error details
+  logger.error("Response Error", {
+    message,
+    statusCode: statusCode || err.statusCode || 500,
+    error: err,
+    data,
+  });
+
   sendResponse(res, {
     status: "error",
     message,

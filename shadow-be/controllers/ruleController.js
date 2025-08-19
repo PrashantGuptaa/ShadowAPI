@@ -7,122 +7,152 @@ const {
   updateRuleByIdService,
 } = require("../services/ruleService");
 const { sendSuccess, sendError } = require("../utils/response");
+const asyncWrapper = require("../middlewares/asyncWrapper");
+const logger = require("../utils/logger");
 
-const fetchRulesController = async (req, res) => {
-  try {
-    const { pageSize, pageNum, type='all' } = req.query;
+const fetchRulesController = asyncWrapper(async (req, res) => {
+  const { pageSize, pageNum, type = "all" } = req.query;
+  const email = req.user?.email;
 
-    const email = req.user?.email;
-    const result = await getRulesByEmailService(
-      email,
-      parseInt(pageNum) || 1,
-      parseInt(pageSize) || 20,
-      type
-    );
-    sendSuccess(res, {
-      data: result,
-      message: "Rules fetched successfully",
-    });
-  } catch (error) {
-    sendError(res, {
-      message: "Error fetching rules",
-      err: error,
-      statusCode: 500,
-    });
-  }
-};
+  logger.info("Fetching rules for user", {
+    email,
+    pageNum: parseInt(pageNum) || 1,
+    pageSize: parseInt(pageSize) || 20,
+    type,
+  });
 
-const saveRuleController = async (req, res) => {
-  try {
-    await saveRuleService(req.body, req.user?.email);
-    sendSuccess(res, {
-      message: "Rule saved successfully",
-      statusCode: 201,
-    });
-  } catch (error) {
-    sendError(res, {
-      message: "Error saving rule",
-      err: error,
-      statusCode: 500,
-    });
-  }
-};
+  const result = await getRulesByEmailService(
+    email,
+    parseInt(pageNum) || 1,
+    parseInt(pageSize) || 20,
+    type
+  );
 
-const getActiveRulesToMockController = async (req, res) => {
-  try {
-    const email = req.user?.email;
-    const rules = await fetchActiveRulesToMockService(email);
-    sendSuccess(res, {
-      data: rules,
-      message: "Active rules fetched successfully",
-    });
-  } catch (error) {
-    sendError(res, {
-      message: "Error fetching active rules",
-      err: error,
-      statusCode: 500,
-    });
-  }
-};
+  logger.info("Rules fetched successfully", {
+    email,
+    totalRules: result.totalCount,
+    returnedRules: result.rules.length,
+  });
 
-const updateRuleStatusController = async (req, res) => {
-  try {
-    const { ruleId, isActive } = req.body;
-    const data = await updateRuleStatusService(
-      ruleId,
-      isActive,
-      req.user?.email
-    );
-    sendSuccess(res, {
-      message: "Rule status updated successfully",
-      data,
-    });
-  } catch (error) {
-    sendError(res, {
-      message: "Error updating rule status",
-      err: error,
-    });
-  }
-};
+  sendSuccess(res, {
+    data: result,
+    message: "Rules fetched successfully",
+  });
+});
 
-const getRuleByIdController = async (req, res) => {
-  try {
-    const { ruleId } = req.params;
-    const email = req.user?.email;
-    const rule = await getRuleByIdService(ruleId, email);
-    sendSuccess(res, {
-      data: rule,
-      message: "Rule fetched successfully",
-    });
-  } catch (error) {
-    sendError(res, {
-      message: "Error fetching rule",
-      err: error,
-    });
-  }
-};
+const saveRuleController = asyncWrapper(async (req, res) => {
+  const email = req.user?.email;
 
-const updateRuleByIdController = async (req, res) => {
-  try {
-    const { ruleId } = req.params;
-    const email = req.user?.email;
-    const ruleDetailsToUpdate = req.body;
-    const updatedRule = await updateRuleByIdService(
-      ruleId,
-      email,
-      ruleDetailsToUpdate
-    );
-    sendSuccess(res, {
-      data: updatedRule,
-      message: "Rule updated successfully",
-    });
-  } catch (error) {
-    sendError(res, {
-      message: "Error updating rule",
-      err: error,
-    });
-  }
-};
+  logger.info("Saving new rule", {
+    email,
+    ruleName: req.body.name,
+    ruleMethod: req.body.method,
+    ruleUrl: req.body.url,
+  });
+
+  await saveRuleService(req.body, email);
+
+  logger.info("Rule saved successfully", {
+    email,
+    ruleName: req.body.name,
+  });
+
+  sendSuccess(res, {
+    message: "Rule saved successfully",
+    statusCode: 201,
+  });
+});
+
+const getActiveRulesToMockController = asyncWrapper(async (req, res) => {
+  const email = req.user?.email;
+
+  logger.info("Fetching active rules for mocking", { email });
+
+  const rules = await fetchActiveRulesToMockService(email);
+
+  logger.info("Active rules fetched for mocking", {
+    email,
+    activeRulesCount: rules.length,
+  });
+
+  sendSuccess(res, {
+    data: rules,
+    message: "Active rules fetched successfully",
+  });
+});
+
+const updateRuleStatusController = asyncWrapper(async (req, res) => {
+  const { ruleId, isActive } = req.body;
+  const email = req.user?.email;
+
+  logger.info("Updating rule status", {
+    email,
+    ruleId,
+    newStatus: isActive ? "active" : "inactive",
+  });
+
+  const data = await updateRuleStatusService(ruleId, isActive, email);
+
+  logger.info("Rule status updated successfully", {
+    email,
+    ruleId,
+    newStatus: isActive ? "active" : "inactive",
+  });
+
+  sendSuccess(res, {
+    message: "Rule status updated successfully",
+    data,
+  });
+});
+
+const getRuleByIdController = asyncWrapper(async (req, res) => {
+  const { ruleId } = req.params;
+  const email = req.user?.email;
+
+  logger.info("Fetching rule by ID", { email, ruleId });
+
+  const rule = await getRuleByIdService(ruleId, email);
+
+  logger.info("Rule fetched successfully by ID", {
+    email,
+    ruleId,
+    ruleName: rule.name,
+  });
+
+  sendSuccess(res, {
+    data: rule,
+    message: "Rule fetched successfully",
+  });
+});
+
+const updateRuleByIdController = asyncWrapper(async (req, res) => {
+  const { ruleId } = req.params;
+  const email = req.user?.email;
+  const ruleDetailsToUpdate = req.body;
+
+  logger.info("Updating rule by ID", {
+    email,
+    ruleId,
+    updateFields: Object.keys(ruleDetailsToUpdate),
+  });
+
+  const updatedRule = await updateRuleByIdService(
+    ruleId,
+    email,
+    ruleDetailsToUpdate
+  );
+
+  logger.info("Rule updated successfully by ID", {
+    email,
+    ruleId,
+    ruleName: updatedRule.name,
+  });
+
+  sendSuccess(res, {
+    data: updatedRule,
+    message: "Rule updated successfully",
+  });
+});
 
 module.exports = {
   fetchRulesController,

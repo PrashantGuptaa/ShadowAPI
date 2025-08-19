@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const AppError = require("./appError");
+const logger = require("./logger");
 
 function generateUserJwtToken(user, expiresIn = "24h") {
   const payload = {
@@ -9,9 +10,16 @@ function generateUserJwtToken(user, expiresIn = "24h") {
     name: user.name,
     picture: user.picture || null, // Optional field
   };
-  const secretKey = process.env.USER_SECRET_KEY || '';
+  const secretKey = process.env.USER_SECRET_KEY || "";
   const options = { expiresIn }; // Token expiration time
   const token = jwt.sign(payload, secretKey, options);
+
+  logger.debug("JWT token generated successfully", {
+    userId: user.userId,
+    email: user.email,
+    expiresIn,
+  });
+
   return token;
 }
 
@@ -19,10 +27,20 @@ const verifyUserJwtToken = (token) => {
   try {
     const secretKey = process.env.USER_CONSUMER_KEY;
     const decoded = jwt.verify(token, secretKey);
+
+    logger.debug("JWT token verified successfully", {
+      userId: decoded.userId,
+      email: decoded.email,
+    });
+
     return decoded;
   } catch (error) {
-    console.error("JWT verification failed:", error);
-    throw new AppError("Invalid token", 401);
+    logger.error("JWT verification failed", {
+      error,
+      tokenPresent: !!token,
+      errorType: error.name,
+    });
+    throw new AppError("Invalid token", 401, error);
   }
 };
 module.exports = {

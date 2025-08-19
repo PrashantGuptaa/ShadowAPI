@@ -1,8 +1,9 @@
 const Rule = require("../models/ruleModel");
 const AppError = require("../utils/appError");
+const logger = require("../utils/logger");
 
 const getRulesByEmailService = async (email, pageNum = 1, pageSize = 10, type) => {
-  console.log("Fetching rules for user:", email);
+  logger.info("Fetching rules for user", { email, pageNum, pageSize, type });
   if (!email) {
     throw new AppError("Email is required to fetch rules", 400);
   }
@@ -41,7 +42,7 @@ const saveRuleService = async (ruleData, email) => {
 };
 
 const fetchActiveRulesToMockService = async (email) => {
-  console.log("Fetching active rules for user:", email);
+  logger.info("Fetching active rules for user", { email });
   if (!email) {
     throw new Error("Email is required to fetch active rules");
   }
@@ -50,7 +51,7 @@ const fetchActiveRulesToMockService = async (email) => {
     deleted: false,
     createdBy: email,
   });
-  console.log("Active rules fetched:", rules.length);
+  logger.info("Active rules fetched", { email, rulesCount: rules.length });
   return rules;
 };
 
