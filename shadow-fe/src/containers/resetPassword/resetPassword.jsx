@@ -17,6 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { Link, useNavigate, useSearchParams } from "react-router";
+import InputWithLabel from "../../components/InputWithLabel/inputWithLabel";
 import { resetPasswordAPI } from "../../utils/apiRequestUtils";
 
 const ResetPassword = () => {
@@ -136,13 +137,12 @@ const ResetPassword = () => {
         bg="gray.50"
       >
         <Box
-          bg="white"
           p={8}
-          rounded="lg"
-          shadow="lg"
-          maxW="md"
-          w="full"
-          mx={4}
+          rounded="md"
+          shadow="xl"
+          maxW="400px"
+          w="100%"
+          bg="brand.surface"
         >
           <VStack spacing={6}>
             <Alert status="success" rounded="md">
@@ -153,7 +153,13 @@ const ResetPassword = () => {
               </AlertDescription>
             </Alert>
 
-            <Button as={Link} to="/login" colorScheme="blue" w="full">
+            <Button
+              as={Link}
+              to="/login"
+              variant="outline"
+              _hover={{ bg: "brand.accent", color: "brand.bg" }}
+              w="full"
+            >
               Go to Login
             </Button>
           </VStack>
@@ -166,39 +172,38 @@ const ResetPassword = () => {
     <Flex
       height="100vh"
       width="100vw"
-      justifyContent="center"
-      alignItems="center"
-      bg="gray.50"
+      justifyContent="flex-end"
+      bgImage="url('/assets/login2.png')"
+      bgSize="cover"
+      bgPosition="center"
     >
-      <Box bg="white" p={8} rounded="lg" shadow="lg" maxW="md" w="full" mx={4}>
+      <Box
+        p={8}
+        rounded="md"
+        shadow="xl"
+        maxW="400px"
+        w="100%"
+        bg="brand.surface"
+      >
         <VStack spacing={6}>
           <VStack spacing={2}>
-            <Text fontSize="2xl" fontWeight="bold" color="gray.800">
+            <Text fontSize="2xl" fontWeight="bold" color="brand.text">
               Reset Password
             </Text>
-            <Text fontSize="sm" color="gray.600" textAlign="center">
+            <Text fontSize="sm" color="brand.textSecondary" textAlign="center">
               Enter your new password below
             </Text>
           </VStack>
 
           <Box as="form" onSubmit={handleSubmit} w="full">
             <VStack spacing={4}>
-              <InputGroup>
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="New password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  size="lg"
-                  bg="gray.50"
-                  border="1px"
-                  borderColor="gray.200"
-                  _focus={{
-                    borderColor: "blue.500",
-                    bg: "white",
-                  }}
-                />
-                <InputRightElement height="100%">
+              <InputWithLabel
+                label="New Password"
+                type={showPassword ? "text" : "password"}
+                placeholder="New password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                rightElement={
                   <IconButton
                     variant="ghost"
                     size="sm"
@@ -208,25 +213,16 @@ const ResetPassword = () => {
                       showPassword ? "Hide password" : "Show password"
                     }
                   />
-                </InputRightElement>
-              </InputGroup>
+                }
+              />
 
-              <InputGroup>
-                <Input
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm new password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  size="lg"
-                  bg="gray.50"
-                  border="1px"
-                  borderColor="gray.200"
-                  _focus={{
-                    borderColor: "blue.500",
-                    bg: "white",
-                  }}
-                />
-                <InputRightElement height="100%">
+              <InputWithLabel
+                label="Confirm Password"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm new password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                rightElement={
                   <IconButton
                     variant="ghost"
                     size="sm"
@@ -236,10 +232,15 @@ const ResetPassword = () => {
                       showConfirmPassword ? "Hide password" : "Show password"
                     }
                   />
-                </InputRightElement>
-              </InputGroup>
+                }
+              />
 
-              <Text fontSize="xs" color="gray.500" textAlign="left" w="full">
+              <Text
+                fontSize="xs"
+                color="brand.textSecondary"
+                textAlign="left"
+                w="full"
+              >
                 Password must be 8+ characters with uppercase, lowercase, number
                 & special character
               </Text>
@@ -250,7 +251,8 @@ const ResetPassword = () => {
                 loadingText="Resetting..."
                 w="full"
                 size="lg"
-                colorScheme="blue"
+                variant="outline"
+                _hover={{ bg: "brand.accent", color: "brand.bg" }}
                 isDisabled={!token}
               >
                 Reset Password
@@ -259,13 +261,25 @@ const ResetPassword = () => {
           </Box>
 
           <HStack spacing={4} w="full" justify="center">
-            <Button as={Link} to="/login" variant="ghost" size="sm">
+            <Button
+              as={Link}
+              to="/login"
+              variant="ghost"
+              size="sm"
+              color="brand.textSecondary"
+            >
               Back to Login
             </Button>
 
-            <Text color="gray.400">•</Text>
+            <Text color="brand.textSecondary">•</Text>
 
-            <Button as={Link} to="/forgot-password" variant="ghost" size="sm">
+            <Button
+              as={Link}
+              to="/forgot-password"
+              variant="ghost"
+              size="sm"
+              color="brand.textSecondary"
+            >
               Request New Link
             </Button>
           </HStack>

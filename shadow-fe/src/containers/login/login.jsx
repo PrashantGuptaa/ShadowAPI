@@ -104,7 +104,6 @@ export default function LoginPage() {
     >
       <Box
         p={8}
-        rounded="md"
         shadow="xl"
         maxW="400px"
         w="100%"

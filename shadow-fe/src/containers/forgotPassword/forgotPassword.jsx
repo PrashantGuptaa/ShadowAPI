@@ -12,7 +12,8 @@ import {
   AlertIcon,
   AlertDescription,
 } from "@chakra-ui/react";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
+import InputWithLabel from "../../components/InputWithLabel/inputWithLabel";
 import { forgotPasswordAPI } from "../../utils/apiRequestUtils";
 
 const ForgotPassword = () => {
@@ -20,7 +21,6 @@ const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const toast = useToast();
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,18 +67,18 @@ const ForgotPassword = () => {
       <Flex
         height="100vh"
         width="100vw"
-        justifyContent="center"
-        alignItems="center"
-        bg="gray.50"
+        justifyContent="flex-end"
+        bgImage="url('/assets/login2.png')"
+        bgSize="cover"
+        bgPosition="center"
       >
         <Box
-          bg="white"
           p={8}
-          rounded="lg"
-          shadow="lg"
-          maxW="md"
-          w="full"
-          mx={4}
+          rounded="md"
+          shadow="xl"
+          maxW="400px"
+          w="100%"
+          bg="brand.surface"
         >
           <VStack spacing={6}>
             <Alert status="success" rounded="md">
@@ -91,13 +91,20 @@ const ForgotPassword = () => {
             </Alert>
 
             <VStack spacing={4} w="full">
-              <Button as={Link} to="/login" variant="outline" w="full">
+              <Button
+                as={Link}
+                to="/login"
+                variant="outline"
+                w="full"
+                _hover={{ bg: "brand.accent", color: "brand.bg" }}
+              >
                 Back to Login
               </Button>
 
               <Button
                 variant="ghost"
                 size="sm"
+                color="brand.textSecondary"
                 onClick={() => setSuccess(false)}
               >
                 Try different email
@@ -113,17 +120,18 @@ const ForgotPassword = () => {
     <Flex
       height="100vh"
       width="100vw"
-      justifyContent="center"
-      alignItems="center"
-      bg="gray.50"
+      justifyContent="flex-end"
+      bgImage="url('/assets/login2.png')"
+      bgSize="cover"
+      bgPosition="center"
     >
-      <Box bg="white" p={8} rounded="lg" shadow="lg" maxW="md" w="full" mx={4}>
+      <Box p={8} shadow="xl" maxW="400px" w="100%" bg="brand.surface">
         <VStack spacing={6}>
           <VStack spacing={2}>
-            <Text fontSize="2xl" fontWeight="bold" color="gray.800">
+            <Text fontSize="2xl" fontWeight="bold" color="brand.text">
               Forgot Password?
             </Text>
-            <Text fontSize="sm" color="gray.600" textAlign="center">
+            <Text fontSize="sm" color="brand.textSecondary" textAlign="center">
               No worries! Enter your email address and we'll send you a link to
               reset your password.
             </Text>
@@ -131,19 +139,12 @@ const ForgotPassword = () => {
 
           <Box as="form" onSubmit={handleSubmit} w="full">
             <VStack spacing={4}>
-              <Input
+              <InputWithLabel
+                label="Email"
                 type="email"
                 placeholder="Enter your email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                size="lg"
-                bg="gray.50"
-                border="1px"
-                borderColor="gray.200"
-                _focus={{
-                  borderColor: "blue.500",
-                  bg: "white",
-                }}
               />
 
               <Button
@@ -152,7 +153,8 @@ const ForgotPassword = () => {
                 loadingText="Sending..."
                 w="full"
                 size="lg"
-                colorScheme="blue"
+                variant="outline"
+                _hover={{ bg: "brand.accent", color: "brand.bg" }}
               >
                 Send Reset Link
               </Button>
@@ -160,13 +162,25 @@ const ForgotPassword = () => {
           </Box>
 
           <HStack spacing={4} w="full" justify="center">
-            <Button as={Link} to="/login" variant="ghost" size="sm">
+            <Button
+              as={Link}
+              to="/login"
+              variant="ghost"
+              size="sm"
+              color="brand.textSecondary"
+            >
               Back to Login
             </Button>
 
-            <Text color="gray.400">•</Text>
+            <Text color="brand.textSecondary">•</Text>
 
-            <Button as={Link} to="/register" variant="ghost" size="sm">
+            <Button
+              as={Link}
+              to="/register"
+              variant="ghost"
+              size="sm"
+              color="brand.textSecondary"
+            >
               Create Account
             </Button>
           </HStack>

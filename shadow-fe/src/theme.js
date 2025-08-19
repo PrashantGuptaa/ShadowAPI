@@ -29,9 +29,14 @@ export const charcoalGoldenTheme = extendTheme({
       surface: "#1F1F1F", // Box backgrounds
       topSurface: "#2C2C2C", // Top surface for headers, footers
       primary: "#FFC857", // Golden Amber
+      accent: "#FFC857", // Accent color (same as primary)
       hover: "#2C2C2C", // Hover states
       text: "#F5F5F5", // Text
+      textSecondary: "#B0B0B0", // Secondary/muted text
       mutedText: "#B0B0B0", // Muted text
+      inputBg: "#2C2C2C", // Input background
+      inputFocus: "#1F1F1F", // Input focus background
+      border: "#444444", // Border color
       danger: "#FF6B6B",
       // heading: "#FFC857", // Headings
     },
@@ -114,10 +119,11 @@ export const charcoalGoldenTheme = extendTheme({
       variants: {
         solid: (props) => ({
           bg: `${props.colorScheme}.500`,
-          color:
-            props.color ? props.color : props.colorScheme === "steel"
-              ? "#FFFFFF"
-              : "#121212",
+          color: props.color
+            ? props.color
+            : props.colorScheme === "steel"
+            ? "#FFFFFF"
+            : "#121212",
           _hover: {
             bg: `${props.colorScheme}.600`,
           },
