@@ -12,7 +12,7 @@ import {
   AlertIcon,
   AlertDescription,
 } from "@chakra-ui/react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import { forgotPasswordAPI } from "../../utils/apiRequestUtils";
 
 const ForgotPassword = () => {

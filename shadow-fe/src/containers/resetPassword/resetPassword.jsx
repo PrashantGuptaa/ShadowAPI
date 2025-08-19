@@ -16,7 +16,7 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { resetPasswordAPI } from "../../utils/apiRequestUtils";
 
 const ResetPassword = () => {
