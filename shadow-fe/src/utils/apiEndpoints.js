@@ -4,6 +4,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export const REGISTER_ENDPOINT = `${API_BASE_URL}user/register`;
 export const LOGIN_ENDPOINT = `${API_BASE_URL}user/login`;
 export const VERIFY_EMAIL_ENDPOINT = `${API_BASE_URL}user/verify-email`;
+export const FORGOT_PASSWORD_ENDPOINT = `${API_BASE_URL}user/forgot-password`;
+export const RESET_PASSWORD_ENDPOINT = `${API_BASE_URL}user/reset-password`;
 export const VALIDATE_AND_ISSUE_TOKEN_ENDPOINT = `${API_BASE_URL}user/me`;
 
 // Google Authentication Endpoint

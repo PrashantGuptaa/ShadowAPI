@@ -10,6 +10,8 @@ import Register from "./containers/register";
 import RuleConfig from "./containers/ruleConfig";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AuthSuccess from "./containers/AuthSuccess";
+import ForgotPassword from "./containers/forgotPassword";
+import ResetPassword from "./containers/resetPassword";
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         <Route
           path="/dashboard"

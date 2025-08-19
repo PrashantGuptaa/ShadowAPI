@@ -5,6 +5,8 @@ const {
   registerUserService,
   loginUserService,
   verifyEmailService,
+  forgotPasswordService,
+  resetPasswordService,
 } = require("../services/userService");
 const { generateUserJwtToken } = require("../utils/jwtUtils");
 const logger = require("../utils/logger");
@@ -107,10 +109,40 @@ const getUpdatedTokenController = asyncWrapper(async (req, res) => {
   });
 });
 
+const forgotPasswordController = asyncWrapper(async (req, res) => {
+  const { email } = req.body;
+
+  logger.info("Forgot password request", { email });
+
+  const result = await forgotPasswordService(email);
+
+  sendSuccess(res, {
+    message: result.message,
+    statusCode: 200,
+  });
+});
+
+const resetPasswordController = asyncWrapper(async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  logger.info("Reset password attempt", {
+    tokenPreview: token ? token.substring(0, 10) + "..." : "null",
+  });
+
+  const result = await resetPasswordService(token, newPassword);
+
+  sendSuccess(res, {
+    message: result.message,
+    statusCode: 200,
+  });
+});
+
 module.exports = {
   getUserController,
   registerUserController,
   loginUserController,
   verifyUserEmailController,
   getUpdatedTokenController,
+  forgotPasswordController,
+  resetPasswordController,
 };

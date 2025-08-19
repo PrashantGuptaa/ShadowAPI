@@ -12,8 +12,8 @@ import {
 import { Link as RouterLink, useNavigate } from "react-router";
 import InputWithLabel from "../../components/InputWithLabel/inputWithLabel";
 import { isValidEmail, isValidPassword } from "../../utils/validationUtils";
-import apiRequestUtils from "../../utils/apiRequestUtils";
-import { GOOGLE_AUTH_ENDPOINT, LOGIN_ENDPOINT } from "../../utils/apiEndpoints";
+import { loginAPI } from "../../utils/apiRequestUtils";
+import { GOOGLE_AUTH_ENDPOINT } from "../../utils/apiEndpoints";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -43,7 +43,7 @@ export default function LoginPage() {
       return;
     }
     try {
-      const result = await apiRequestUtils.post(LOGIN_ENDPOINT, {
+      const result = await loginAPI({
         email,
         password,
       });
@@ -59,17 +59,33 @@ export default function LoginPage() {
       navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error);
-      const errorMessage =
-        error.response?.data?.error || "Login failed. Please try again.";
-      toast({
-        title: errorMessage,
-        position: "top",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
+
+      // Check if this is an email verification error
+      if (
+        error.response?.status === 403 &&
+        error.response?.data?.message?.includes("verify your email")
+      ) {
+        toast({
+          title: "Email Verification Required",
+          description:
+            error.response.data.message ||
+            "Please check your email and verify your account",
+          status: "warning",
+          duration: 7000,
+          isClosable: true,
+        });
+      } else {
+        const errorMessage =
+          error.response?.data?.error || "Login failed. Please try again.";
+        toast({
+          title: errorMessage,
+          position: "top",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
       return;
-      
     }
   };
 
@@ -124,7 +140,9 @@ export default function LoginPage() {
               error="Invalid password."
             />
             <Flex justify="flex-end">
-              <ChakraLink fontSize="sm">Forgot password?</ChakraLink>
+              <ChakraLink as={RouterLink} to="/forgot-password" fontSize="sm">
+                Forgot password?
+              </ChakraLink>
             </Flex>
             <Button variant="outline" type="submit" width="full">
               Login
