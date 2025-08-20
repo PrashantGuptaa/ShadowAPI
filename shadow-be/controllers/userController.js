@@ -10,6 +10,14 @@ const {
 } = require("../services/userService");
 const { generateUserJwtToken } = require("../utils/jwtUtils");
 const logger = require("../utils/logger");
+const {
+  InputSanitizer,
+  USER_REGISTRATION_SCHEMA,
+  USER_LOGIN_SCHEMA,
+  FORGOT_PASSWORD_SCHEMA,
+  RESET_PASSWORD_SCHEMA,
+  EMAIL_VERIFICATION_SCHEMA,
+} = require("../utils/sanitizer");
 
 const getUserController = asyncWrapper(async (req, res) => {
   const email = req.query.email;
@@ -20,8 +28,14 @@ const getUserController = asyncWrapper(async (req, res) => {
     });
   }
 
+  // Sanitize email input
+  const sanitizedEmail = InputSanitizer.sanitizeEmail(email);
+
   // Find the user by email - fetch only email, name, role, userId
-  const user = await User.findOne({ email }, "email name role userId");
+  const user = await User.findOne(
+    { email: sanitizedEmail },
+    "email name role userId"
+  );
   if (!user) {
     return sendError(res, {
       message: "User not found",
@@ -30,7 +44,7 @@ const getUserController = asyncWrapper(async (req, res) => {
   }
 
   logger.info("User fetched successfully", {
-    email,
+    email: sanitizedEmail,
     userId: user.userId,
   });
 
@@ -41,13 +55,22 @@ const getUserController = asyncWrapper(async (req, res) => {
 });
 
 const registerUserController = asyncWrapper(async (req, res) => {
-  const { email, name, password } = req.body;
+  // Sanitize and validate input
+  const sanitizedData = InputSanitizer.sanitizeObject(
+    req.body,
+    USER_REGISTRATION_SCHEMA
+  );
 
-  const userData = { email, name, password };
-  const newUser = await registerUserService(userData);
+  logger.info("Processing user registration", {
+    email: sanitizedData.email,
+    name: sanitizedData.name,
+    ip: req.ip || req.connection.remoteAddress,
+  });
+
+  const newUser = await registerUserService(sanitizedData);
 
   logger.info("User registered successfully", {
-    email,
+    email: sanitizedData.email,
     userId: newUser.userId,
   });
 
@@ -59,16 +82,24 @@ const registerUserController = asyncWrapper(async (req, res) => {
 });
 
 const loginUserController = asyncWrapper(async (req, res) => {
+  // Sanitize and validate input
+  const sanitizedData = InputSanitizer.sanitizeObject(
+    req.body,
+    USER_LOGIN_SCHEMA
+  );
+
   logger.info("Login attempt", {
-    email: req.body.email,
+    email: sanitizedData.email,
     ip: req.ip || req.connection.remoteAddress,
   });
 
-  const { email, password } = req.body;
-  const user = await loginUserService(email, password);
+  const user = await loginUserService(
+    sanitizedData.email,
+    sanitizedData.password
+  );
 
   logger.info("User logged in successfully", {
-    email,
+    email: sanitizedData.email,
     userId: user.userId,
   });
 
@@ -79,11 +110,21 @@ const loginUserController = asyncWrapper(async (req, res) => {
 });
 
 const verifyUserEmailController = asyncWrapper(async (req, res) => {
-  const { token } = req.body;
-  const response = await verifyEmailService(token);
+  // Sanitize and validate input
+  const sanitizedData = InputSanitizer.sanitizeObject(
+    req.body,
+    EMAIL_VERIFICATION_SCHEMA
+  );
+
+  logger.info("Processing email verification", {
+    tokenPreview: sanitizedData.token.substring(0, 10) + "...",
+    ip: req.ip || req.connection.remoteAddress,
+  });
+
+  const response = await verifyEmailService(sanitizedData.token);
 
   logger.info("User email verified successfully", {
-    token: token.substring(0, 10) + "...",
+    tokenPreview: sanitizedData.token.substring(0, 10) + "...",
   });
 
   sendSuccess(res, {
@@ -110,11 +151,18 @@ const getUpdatedTokenController = asyncWrapper(async (req, res) => {
 });
 
 const forgotPasswordController = asyncWrapper(async (req, res) => {
-  const { email } = req.body;
+  // Sanitize and validate input
+  const sanitizedData = InputSanitizer.sanitizeObject(
+    req.body,
+    FORGOT_PASSWORD_SCHEMA
+  );
 
-  logger.info("Forgot password request", { email });
+  logger.info("Forgot password request", {
+    email: sanitizedData.email,
+    ip: req.ip || req.connection.remoteAddress,
+  });
 
-  const result = await forgotPasswordService(email);
+  const result = await forgotPasswordService(sanitizedData.email);
 
   sendSuccess(res, {
     message: result.message,
@@ -123,13 +171,23 @@ const forgotPasswordController = asyncWrapper(async (req, res) => {
 });
 
 const resetPasswordController = asyncWrapper(async (req, res) => {
-  const { token, newPassword } = req.body;
+  // Sanitize and validate input
+  const sanitizedData = InputSanitizer.sanitizeObject(
+    req.body,
+    RESET_PASSWORD_SCHEMA
+  );
 
   logger.info("Reset password attempt", {
-    tokenPreview: token ? token.substring(0, 10) + "..." : "null",
+    tokenPreview: sanitizedData.token
+      ? sanitizedData.token.substring(0, 10) + "..."
+      : "null",
+    ip: req.ip || req.connection.remoteAddress,
   });
 
-  const result = await resetPasswordService(token, newPassword);
+  const result = await resetPasswordService(
+    sanitizedData.token,
+    sanitizedData.newPassword
+  );
 
   sendSuccess(res, {
     message: result.message,

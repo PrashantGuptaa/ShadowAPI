@@ -15,6 +15,7 @@ import {
 import { Link } from "react-router";
 import InputWithLabel from "../../components/InputWithLabel/inputWithLabel";
 import { forgotPasswordAPI } from "../../utils/apiRequestUtils";
+import { sanitizeEmail } from "../../utils/inputSanitizer";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -36,27 +37,42 @@ const ForgotPassword = () => {
       return;
     }
 
-    setLoading(true);
+    // Client-side validation and sanitization
     try {
-      const response = await forgotPasswordAPI({ email });
+      const sanitizedEmail = sanitizeEmail(email);
+
+      setLoading(true);
+      const response = await forgotPasswordAPI({ email: sanitizedEmail });
       setSuccess(true);
       toast({
         title: "Email Sent",
         description:
-          response.message || "Password reset instructions sent to your email",
+          response.data?.message ||
+          "Password reset instructions sent to your email",
         status: "success",
         duration: 5000,
         isClosable: true,
       });
     } catch (error) {
-      toast({
-        title: "Error",
-        description:
-          error.response?.data?.message || "Failed to send reset email",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
+      // Handle validation errors
+      if (error.message && !error.response) {
+        toast({
+          title: "Invalid Input",
+          description: error.message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description:
+            error.response?.data?.message || "Failed to send reset email",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
     } finally {
       setLoading(false);
     }

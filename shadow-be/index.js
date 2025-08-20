@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 
 const globalErrorHandler = require("./middlewares/errorHandler");
 const requestLogger = require("./middlewares/requestLogger");
+const { generalRateLimiter } = require("./middlewares/rateLimiter");
 const routes = require("./routes");
 const logger = require("./utils/logger");
 
@@ -23,6 +24,9 @@ app.use(
 );
 // Add request logging middleware (includes payload size tracking)
 app.use(requestLogger);
+
+// Add general rate limiting to all routes
+app.use("/api/v1", generalRateLimiter);
 app.use("/api/v1", routes);
 
 // Serve static files from /mock-json under the /cdn route

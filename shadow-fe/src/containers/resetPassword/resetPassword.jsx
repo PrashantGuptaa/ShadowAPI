@@ -19,6 +19,10 @@ import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import InputWithLabel from "../../components/InputWithLabel/inputWithLabel";
 import { resetPasswordAPI } from "../../utils/apiRequestUtils";
+import {
+  validatePassword,
+  checkPasswordStrength,
+} from "../../utils/inputSanitizer";
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -29,6 +33,10 @@ const ResetPassword = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [token, setToken] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState({
+    score: 0,
+    feedback: [],
+  });
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -48,14 +56,11 @@ const ResetPassword = () => {
     setToken(tokenFromUrl);
   }, [searchParams, navigate, toast]);
 
-  const validatePassword = (password) => {
-    const minLength = password.length >= 8;
-    const hasUpper = /[A-Z]/.test(password);
-    const hasLower = /[a-z]/.test(password);
-    const hasNumber = /\d/.test(password);
-    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-    return minLength && hasUpper && hasLower && hasNumber && hasSpecial;
+  // Handle password change with real-time validation
+  const handlePasswordChange = (e) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    setPasswordStrength(checkPasswordStrength(newPassword));
   };
 
   const handleSubmit = async (e) => {

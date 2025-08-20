@@ -8,14 +8,23 @@ const {
   resetPasswordController,
 } = require("../controllers/userController");
 const { validateUser } = require("../middlewares/userMiddleware");
+const {
+  authRateLimiter,
+  forgotPasswordRateLimiter,
+  strictRateLimiter,
+} = require("../middlewares/rateLimiter");
 
 const userRoutes = express.Router();
 
-userRoutes.post("/login", loginUserController);
-userRoutes.post("/register", registerUserController);
-userRoutes.put("/verify-email", verifyUserEmailController);
-userRoutes.post("/forgot-password", forgotPasswordController);
-userRoutes.post("/reset-password", resetPasswordController);
+userRoutes.post("/login", authRateLimiter, loginUserController);
+userRoutes.post("/register", authRateLimiter, registerUserController);
+userRoutes.put("/verify-email", authRateLimiter, verifyUserEmailController);
+userRoutes.post(
+  "/forgot-password",
+  forgotPasswordRateLimiter,
+  forgotPasswordController
+);
+userRoutes.post("/reset-password", strictRateLimiter, resetPasswordController);
 userRoutes.get("/me", validateUser, getUpdatedTokenController);
 
 module.exports = userRoutes;
