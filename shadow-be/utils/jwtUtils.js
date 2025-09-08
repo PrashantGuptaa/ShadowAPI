@@ -11,7 +11,7 @@ function generateUserJwtToken(user, expiresIn = "24h") {
     picture: user.picture || null, // Optional field
   };
   const secretKey = process.env.USER_SECRET_KEY || "";
-  const options = { expiresIn }; // Token expiration time
+  const options = { expiresIn, algorithm: "RS256" }; // Token expiration time
   const token = jwt.sign(payload, secretKey, options);
 
   logger.debug("JWT token generated successfully", {
