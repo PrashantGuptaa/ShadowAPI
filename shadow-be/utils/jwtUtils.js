@@ -13,6 +13,15 @@ function generateUserJwtToken(user, expiresIn = "24h") {
   // Format the private key properly by replacing \n with actual newlines
   let privateKey = (process.env.USER_SECRET_KEY || "").replace(/\\n/g, "\n");
 
+  // Clean the key - remove any surrounding quotes and extra whitespace
+  privateKey = privateKey.trim();
+  if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+    privateKey = privateKey.slice(1, -1);
+  }
+  if (privateKey.startsWith("'") && privateKey.endsWith("'")) {
+    privateKey = privateKey.slice(1, -1);
+  }
+
   // Additional Vercel-specific formatting
   if (!privateKey.includes("-----BEGIN PRIVATE KEY-----")) {
     // If the key doesn't have proper headers, it might be base64 encoded
@@ -23,8 +32,29 @@ function generateUserJwtToken(user, expiresIn = "24h") {
     }
   }
 
+  // Ensure proper line endings
+  privateKey = privateKey.replace(/\\n/g, "\n");
+
   console.log("privateKey length", privateKey.length);
   console.log("privateKey starts with:", privateKey.substring(0, 50));
+  console.log(
+    "privateKey ends with:",
+    privateKey.substring(privateKey.length - 50)
+  );
+
+  // Validate the key format
+  if (
+    !privateKey.includes("-----BEGIN PRIVATE KEY-----") ||
+    !privateKey.includes("-----END PRIVATE KEY-----")
+  ) {
+    logger.error("Invalid private key format", {
+      hasBegin: privateKey.includes("-----BEGIN PRIVATE KEY-----"),
+      hasEnd: privateKey.includes("-----END PRIVATE KEY-----"),
+      keyLength: privateKey.length,
+    });
+    throw new AppError("Invalid private key format for RS256", 500);
+  }
+
   const options = { expiresIn, algorithm: "RS256" }; // Token expiration time
   const token = jwt.sign(payload, privateKey, options);
 
