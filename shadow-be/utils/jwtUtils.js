@@ -10,9 +10,10 @@ function generateUserJwtToken(user, expiresIn = "24h") {
     name: user.name,
     picture: user.picture || null, // Optional field
   };
-  const secretKey = process.env.USER_SECRET_KEY || "";
+  // Format the private key properly by replacing \n with actual newlines
+  const privateKey = (process.env.USER_SECRET_KEY || "").replace(/\\n/g, "\n");
   const options = { expiresIn, algorithm: "RS256" }; // Token expiration time
-  const token = jwt.sign(payload, secretKey, options);
+  const token = jwt.sign(payload, privateKey, options);
 
   logger.debug("JWT token generated successfully", {
     userId: user.userId,
@@ -25,8 +26,14 @@ function generateUserJwtToken(user, expiresIn = "24h") {
 
 const verifyUserJwtToken = (token) => {
   try {
-    const secretKey = process.env.USER_CONSUMER_KEY;
-    const decoded = jwt.verify(token, secretKey);
+    // For RS256, we need the public key for verification
+    // If you have a separate public key, use USER_PUBLIC_KEY
+    // Otherwise, extract public key from private key or use the private key
+    const publicKey = (process.env.USER_CONSUMER_KEY || "").replace(
+      /\\n/g,
+      "\n"
+    );
+    const decoded = jwt.verify(token, publicKey);
 
     logger.debug("JWT token verified successfully", {
       userId: decoded.userId,
