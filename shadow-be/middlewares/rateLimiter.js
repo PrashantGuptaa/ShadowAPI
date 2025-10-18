@@ -124,19 +124,19 @@ const createRateLimiter = (options = {}) => {
 // Predefined rate limiters for different endpoints
 const authRateLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  maxRequests: 20, // 5 attempts per 15 minutes
+  maxRequests: 20, // 20 attempts per 15 minutes
   message: "Too many authentication attempts. Please try again in 15 minutes.",
 });
 
 const forgotPasswordRateLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000, // 1 hour
-  maxRequests: 5, // 3 password reset requests per hour
+  maxRequests: 5, // 5 password reset requests per hour
   message: "Too many password reset requests. Please try again in 1 hour.",
 });
 
 const generalRateLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  maxRequests: 200, // 100 requests per 15 minutes
+  maxRequests: 200, // 200 requests per 15 minutes
   message: "Too many requests. Please slow down.",
 });
 
