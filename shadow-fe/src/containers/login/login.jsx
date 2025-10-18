@@ -89,9 +89,9 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    window.location.href = GOOGLE_AUTH_ENDPOINT;
-  };
+  // const handleGoogleLogin = () => {
+  //   window.location.href = GOOGLE_AUTH_ENDPOINT;
+  // };
 
   return (
     <Flex
@@ -146,7 +146,7 @@ export default function LoginPage() {
             <Button variant="outline" type="submit" width="full">
               Login
             </Button>
-            <Button onClick={handleGoogleLogin}>Continue with Google</Button>
+            {/* <Button onClick={handleGoogleLogin}>Continue with Google</Button> */}
             <Text fontSize="sm">
               Don't have an account?{" "}
               <ChakraLink as={RouterLink} to="/register" fontWeight="medium">
