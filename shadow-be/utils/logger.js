@@ -27,7 +27,8 @@ winston.addColors(colors);
 const level = () => {
   const env = process.env.NODE_ENV || "development";
   const isDevelopment = env === "development";
-  return isDevelopment ? "debug" : "warn";
+  // For Vercel, use 'info' instead of 'warn' to capture more logs
+  return isDevelopment ? "debug" : "info";
 };
 
 // Create logs directory if it doesn't exist
@@ -37,9 +38,14 @@ const logsDir = path.join(__dirname, "../logs");
 const logFormat = winston.format.combine(
   winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss:ms" }),
   winston.format.colorize({ all: true }),
-  winston.format.printf(
-    (info) => `${info.timestamp} ${info.level}: ${info.message}`
-  )
+  winston.format.printf((info) => {
+    // For Vercel compatibility, also output as simple string
+    const message =
+      typeof info.message === "object"
+        ? JSON.stringify(info.message)
+        : info.message;
+    return `${info.timestamp} ${info.level}: ${message}`;
+  })
 );
 
 // Define the format for log files (without colors)
@@ -110,7 +116,20 @@ const logWithContext = (level, message, context = {}) => {
     }
   }
 
+  // Use Winston logger
   logger[level](logData);
+
+  // Fallback for Vercel - also use console.log to ensure visibility
+  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+    const timestamp = new Date().toISOString();
+    const contextStr =
+      Object.keys(context).length > 0
+        ? ` | Context: ${JSON.stringify(context)}`
+        : "";
+    console.log(
+      `[${timestamp}] ${level.toUpperCase()}: ${message}${contextStr}`
+    );
+  }
 };
 
 // Wrapper functions for easy use
