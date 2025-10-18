@@ -57,24 +57,24 @@ const transports = [
     format: logFormat,
   }),
 
-  // Error log file (daily rotation)
-  new winston.transports.DailyRotateFile({
-    filename: path.join(logsDir, "error-%DATE%.log"),
-    datePattern: "YYYY-MM-DD",
-    level: "error",
-    format: fileFormat,
-    maxSize: "20m",
-    maxFiles: "14d",
-  }),
+  // // Error log file (daily rotation)
+  // new winston.transports.DailyRotateFile({
+  //   filename: path.join(logsDir, "error-%DATE%.log"),
+  //   datePattern: "YYYY-MM-DD",
+  //   level: "error",
+  //   format: fileFormat,
+  //   maxSize: "20m",
+  //   maxFiles: "14d",
+  // }),
 
-  // Combined log file (daily rotation)
-  new winston.transports.DailyRotateFile({
-    filename: path.join(logsDir, "combined-%DATE%.log"),
-    datePattern: "YYYY-MM-DD",
-    format: fileFormat,
-    maxSize: "20m",
-    maxFiles: "14d",
-  }),
+  // // Combined log file (daily rotation)
+  // new winston.transports.DailyRotateFile({
+  //   filename: path.join(logsDir, "combined-%DATE%.log"),
+  //   datePattern: "YYYY-MM-DD",
+  //   format: fileFormat,
+  //   maxSize: "20m",
+  //   maxFiles: "14d",
+  // }),
 ];
 
 // Create the winston logger
