@@ -11,8 +11,20 @@ function generateUserJwtToken(user, expiresIn = "24h") {
     picture: user.picture || null, // Optional field
   };
   // Format the private key properly by replacing \n with actual newlines
-  const privateKey = (process.env.USER_SECRET_KEY || "").replace(/\\n/g, "\n");
+  let privateKey = (process.env.USER_SECRET_KEY || "").replace(/\\n/g, "\n");
+
+  // Additional Vercel-specific formatting
+  if (!privateKey.includes("-----BEGIN PRIVATE KEY-----")) {
+    // If the key doesn't have proper headers, it might be base64 encoded
+    try {
+      privateKey = Buffer.from(privateKey, "base64").toString("utf-8");
+    } catch (e) {
+      logger.error("Failed to decode base64 private key", { error: e });
+    }
+  }
+
   console.log("privateKey length", privateKey.length);
+  console.log("privateKey starts with:", privateKey.substring(0, 50));
   const options = { expiresIn, algorithm: "RS256" }; // Token expiration time
   const token = jwt.sign(payload, privateKey, options);
 
@@ -28,13 +40,22 @@ function generateUserJwtToken(user, expiresIn = "24h") {
 const verifyUserJwtToken = (token) => {
   try {
     // For RS256, we need the public key for verification
-    // If you have a separate public key, use USER_PUBLIC_KEY
-    // Otherwise, extract public key from private key or use the private key
-    const publicKey = (process.env.USER_CONSUMER_KEY || "").replace(
-      /\\n/g,
-      "\n"
-    );
+    let publicKey = (process.env.USER_CONSUMER_KEY || "").replace(/\\n/g, "\n");
+
+    // Additional Vercel-specific formatting for public key
+    if (
+      !publicKey.includes("-----BEGIN PUBLIC KEY-----") &&
+      !publicKey.includes("-----BEGIN PRIVATE KEY-----")
+    ) {
+      try {
+        publicKey = Buffer.from(publicKey, "base64").toString("utf-8");
+      } catch (e) {
+        logger.error("Failed to decode base64 public key", { error: e });
+      }
+    }
+
     console.log("publicKey length", publicKey.length);
+    console.log("publicKey starts with:", publicKey.substring(0, 50));
     const decoded = jwt.verify(token, publicKey);
 
     logger.debug("JWT token verified successfully", {
