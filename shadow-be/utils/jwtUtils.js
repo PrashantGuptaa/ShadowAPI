@@ -12,6 +12,7 @@ function generateUserJwtToken(user, expiresIn = "24h") {
   };
   // Format the private key properly by replacing \n with actual newlines
   const privateKey = (process.env.USER_SECRET_KEY || "").replace(/\\n/g, "\n");
+  console.log("privateKey length", privateKey.length);
   const options = { expiresIn, algorithm: "RS256" }; // Token expiration time
   const token = jwt.sign(payload, privateKey, options);
 
@@ -33,6 +34,7 @@ const verifyUserJwtToken = (token) => {
       /\\n/g,
       "\n"
     );
+    console.log("publicKey length", publicKey.length);
     const decoded = jwt.verify(token, publicKey);
 
     logger.debug("JWT token verified successfully", {
