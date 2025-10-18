@@ -87,8 +87,12 @@ const transports = [
 const logger = winston.createLogger({
   level: level(),
   levels,
-  format: winston.format.simple(),
-  transports,
+  format: logFormat,
+  transports: [
+    new winston.transports.Console({
+      level: level(),
+    }),
+  ],
   exitOnError: false,
 });
 
@@ -120,7 +124,7 @@ const logWithContext = (level, message, context = {}) => {
   logger[level](logData);
 
   // Fallback for Vercel - also use console.log to ensure visibility
-  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV === "production") {
     const timestamp = new Date().toISOString();
     const contextStr =
       Object.keys(context).length > 0
