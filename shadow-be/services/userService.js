@@ -80,7 +80,10 @@ const registerUserService = async (userData) => {
       userName,
     });
     const token = generateUserJwtToken(user, "1h");
-    logger.info("User registration token generated successfully", token.substring(0, 10) + "...");
+    logger.info(
+      "User registration token generated successfully",
+      token.substring(0, 10) + "..."
+    );
     // Send verification email
     await sendVerificationEmailService(email);
     return { token, email, name, userName, userId, _id };
