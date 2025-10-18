@@ -34,14 +34,6 @@ function generateUserJwtToken(user, expiresIn = "24h") {
 
   // Ensure proper line endings
   privateKey = privateKey.replace(/\\n/g, "\n");
-
-  console.log("privateKey length", privateKey.length);
-  console.log("privateKey starts with:", privateKey.substring(0, 50));
-  console.log(
-    "privateKey ends with:",
-    privateKey.substring(privateKey.length - 50)
-  );
-
   // Validate the key format
   if (
     !privateKey.includes("-----BEGIN PRIVATE KEY-----") ||
