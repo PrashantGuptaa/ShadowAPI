@@ -24,7 +24,6 @@ const sendEmailService = async (mailOptions) => {
     throw new Error("Email service not properly configured");
   }
 
-
   // Create a transporter object using SMTP
   const transporter = nodemailer.createTransport({
     service: process.env.EMAIL_SERVICE,

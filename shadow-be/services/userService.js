@@ -221,7 +221,7 @@ const sendVerificationEmailService = async (email) => {
   const verificationUrl = `${process.env.UI_URL}/verify-email?token=${token}`;
   logger.debug("Verification URL generated", { email });
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: process.env.EMAIL_FROM,
     to: email,
     subject: "Verify your email",
     //     text: `Click here to verify your email: ${verificationUrl}. This link expires in 10 minutes.`,
