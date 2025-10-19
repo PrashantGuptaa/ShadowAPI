@@ -11,7 +11,6 @@ import {
   MenuButton,
   Avatar,
 } from "@chakra-ui/react";
-import { FaUserCircle } from "react-icons/fa";
 import logo from "../../assets/shadowGolden.png";
 import { useNavigate } from "react-router";
 import { clearLocalStorage } from "../../utils/commonUtils";
@@ -56,9 +55,9 @@ const AppHeader = () => {
               icon={
                 <Avatar
                   size="sm"
-                  name={localStorage.getItem("name")} // fallback initials if no image
-                  src={localStorage.getItem("picture")} // user.profile picture URL
-                  bg="brand.primary" // matches your theme
+                  name={localStorage.getItem("name")}
+                  src={localStorage.getItem("picture")}
+                  bg="brand.primary"
                 />
               }
               borderRadius="full"
