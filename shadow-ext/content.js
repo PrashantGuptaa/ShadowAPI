@@ -113,6 +113,19 @@ try {
 
       return true; // Keep the message channel open for async response
     }
+
+    if (message.type === "RULES_UPDATED") {
+      debug("Received RULES_UPDATED notification", message.rulesCount);
+      console.log(`[ShadowAPI] Rules updated: ${message.rulesCount} rules`);
+      
+      // Notify the injected script that rules have been updated
+      window.postMessage({
+        type: "RULES_UPDATED",
+        rulesCount: message.rulesCount
+      }, "*");
+      
+      sendResponse({ status: "acknowledged" });
+    }
   });
 } catch (error) {
   console.error("[ShadowAPI] Could not set up message listener:", error);

@@ -1,31 +1,41 @@
 (function () {
   console.log("[ShadowAPI] Running injected override from scripting");
 
+  // Store current rules in closure
+  let currentRules = [];
+
   // Request rules and set up listener
   window.postMessage({ type: "GET_RULES" }, "*");
 
   // Listen for rules from the background script
-
   window.addEventListener("message", (event) => {
-    if (
-      event.source === window &&
-      event.data?.type === "GET_RULES_RESPONSE" &&
-      event.data?.enabled
-    ) {
+    if (event.source !== window) return;
+
+    // Handle initial rule response
+    if (event.data?.type === "GET_RULES_RESPONSE" && event.data?.enabled) {
       const rules = event.data.rules || [];
       console.log(
         "[ShadowAPI] Overriding network functions with",
         rules.length,
         "rules"
       );
-      // Override fetch and XHR with the provided rules
+      
       if (rules.length === 0) {
         console.warn(
           "[ShadowAPI] No rules provided, fetch/XHR will not be mocked"
         );
         return;
       }
-      overrideFetchAndXHR(event.data.rules || []);
+      
+      currentRules = rules;
+      overrideFetchAndXHR(rules);
+    }
+
+    // Handle rule updates
+    if (event.data?.type === "RULES_UPDATED") {
+      console.log("[ShadowAPI] Rules updated notification received");
+      // Re-request rules to get the latest
+      window.postMessage({ type: "GET_RULES" }, "*");
     }
   });
 
