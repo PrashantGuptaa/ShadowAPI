@@ -6,6 +6,7 @@ const {
   getUpdatedTokenController,
   forgotPasswordController,
   resetPasswordController,
+  extensionLoginController,
 } = require("../controllers/userController");
 const { validateUser } = require("../middlewares/userMiddleware");
 const {
@@ -17,6 +18,7 @@ const {
 const userRoutes = express.Router();
 
 userRoutes.post("/login", authRateLimiter, loginUserController);
+userRoutes.post("/extension-login", authRateLimiter, extensionLoginController);
 userRoutes.post("/register", authRateLimiter, registerUserController);
 userRoutes.put("/verify-email", authRateLimiter, verifyUserEmailController);
 userRoutes.post(
