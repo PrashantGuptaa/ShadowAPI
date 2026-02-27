@@ -7,6 +7,7 @@ const {
   verifyEmailService,
   forgotPasswordService,
   resetPasswordService,
+  extensionLoginService,
 } = require("../services/userService");
 const { generateUserJwtToken } = require("../utils/jwtUtils");
 const logger = require("../utils/logger");
@@ -195,6 +196,34 @@ const resetPasswordController = asyncWrapper(async (req, res) => {
   });
 });
 
+const extensionLoginController = asyncWrapper(async (req, res) => {
+  const sanitizedData = InputSanitizer.sanitizeObject(
+    req.body,
+    USER_LOGIN_SCHEMA
+  );
+
+  logger.info("Extension login attempt", {
+    email: sanitizedData.email,
+    ip: req.ip || req.connection.remoteAddress,
+  });
+
+  const user = await extensionLoginService(
+    sanitizedData.email,
+    sanitizedData.password
+  );
+
+  logger.info("Extension user logged in successfully", {
+    email: sanitizedData.email,
+    userId: user.userId,
+    tokenExpiry: "180 days",
+  });
+
+  sendSuccess(res, {
+    data: user,
+    message: "Extension login successful. Token valid for 180 days.",
+  });
+});
+
 module.exports = {
   getUserController,
   registerUserController,
@@ -203,4 +232,5 @@ module.exports = {
   getUpdatedTokenController,
   forgotPasswordController,
   resetPasswordController,
+  extensionLoginController,
 };

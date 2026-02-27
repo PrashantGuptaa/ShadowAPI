@@ -5,13 +5,14 @@ const {
   updateRuleStatusService,
   getRuleByIdService,
   updateRuleByIdService,
+  deleteRuleByIdService,
 } = require("../services/ruleService");
 const { sendSuccess, sendError } = require("../utils/response");
 const asyncWrapper = require("../middlewares/asyncWrapper");
 const logger = require("../utils/logger");
 
 const fetchRulesController = asyncWrapper(async (req, res) => {
-  const { pageSize, pageNum, type = "all" } = req.query;
+  const { pageSize, pageNum, type = "all", search = "" } = req.query;
   const email = req.user?.email;
 
   logger.info("Fetching rules for user", {
@@ -19,13 +20,15 @@ const fetchRulesController = asyncWrapper(async (req, res) => {
     pageNum: parseInt(pageNum) || 1,
     pageSize: parseInt(pageSize) || 20,
     type,
+    search,
   });
 
   const result = await getRulesByEmailService(
     email,
     parseInt(pageNum) || 1,
     parseInt(pageSize) || 20,
-    type
+    type,
+    search
   );
 
   logger.info("Rules fetched successfully", {
@@ -154,6 +157,24 @@ const updateRuleByIdController = asyncWrapper(async (req, res) => {
   });
 });
 
+const deleteRuleByIdController = asyncWrapper(async (req, res) => {
+  const { ruleId } = req.params;
+  const email = req.user?.email;
+
+  logger.info("Deleting rule by ID", { email, ruleId });
+
+  await deleteRuleByIdService(ruleId, email);
+
+  logger.info("Rule deleted successfully by ID", { email, ruleId });
+
+  sendSuccess(res, {
+    message: "Rule deleted successfully",
+    data: {
+      ruleId,
+    },
+  });
+});
+
 module.exports = {
   fetchRulesController,
   saveRuleController,
@@ -161,4 +182,5 @@ module.exports = {
   updateRuleStatusController,
   getRuleByIdController,
   updateRuleByIdController,
+  deleteRuleByIdController,
 };
