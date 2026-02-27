@@ -2,15 +2,31 @@ const Rule = require("../models/ruleModel");
 const AppError = require("../utils/appError");
 const logger = require("../utils/logger");
 
-const getRulesByEmailService = async (email, pageNum = 1, pageSize = 10, type) => {
-  logger.info("Fetching rules for user", { email, pageNum, pageSize, type });
+const getRulesByEmailService = async (
+  email,
+  pageNum = 1,
+  pageSize = 10,
+  type,
+  search,
+) => {
+  logger.info("Fetching rules for user", { email, pageNum, pageSize, type, search });
   if (!email) {
     throw new AppError("Email is required to fetch rules", 400);
   }
   const offset = (pageNum - 1) * pageSize;
   const rules = await Rule.find(
-    { deleted: false, createdBy: email, ...(type !== 'all' && { isActive: type === 'active' }) },
-    "ruleId name description method url updatedBy updatedAt isActive"
+    {
+      deleted: false,
+      createdBy: email,
+      ...(type !== "all" && { isActive: type === "active" }),
+      ...(search && {
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { description: { $regex: search, $options: "i" } },
+        ],
+      }),
+    },
+    "ruleId name description method url updatedBy updatedAt isActive",
   )
     .skip(offset)
     .limit(pageSize)
@@ -62,12 +78,12 @@ const updateRuleStatusService = async (ruleId, isActive, email) => {
   const rule = await Rule.findOneAndUpdate(
     { ruleId, createdBy: email, deleted: false },
     { isActive, updatedBy: email },
-    { new: true }
+    { new: true },
   );
   if (!rule) {
     throw new AppError(
       "Rule not found or you do not have permission to update it",
-      404
+      404,
     );
   }
   return rule;
@@ -81,7 +97,7 @@ const getRuleByIdService = async (ruleId, email) => {
   if (!rule) {
     throw new AppError(
       "Rule not found or you do not have permission to access it",
-      404
+      404,
     );
   }
   return rule;
@@ -95,15 +111,31 @@ const updateRuleByIdService = async (ruleId, email, ruleDetailsToUpdate) => {
   const updatedRule = await Rule.findOneAndUpdate(
     { ruleId, createdBy: email, deleted: false },
     { ...ruleDetailsToUpdate, updatedBy: email, isActive: false },
-    { new: true }
+    { new: true },
   );
   if (!updatedRule) {
     throw new AppError(
       "Rule not found or you do not have permission to update it",
-      404
+      404,
     );
   }
   return updatedRule;
+};
+
+const deleteRuleByIdService = async (ruleId, email) => {
+  if (!ruleId || !email) {
+    throw new AppError("Rule ID and email are required", 400);
+  }
+  const deletedRule = await Rule.findOneAndUpdate(
+    { ruleId, createdBy: email, deleted: false },
+    { deleted: true, updatedBy: email },
+  );
+  if (!deletedRule) {
+    throw new AppError(
+      "Rule not found or already deleted",
+      404,
+    );
+  }
 };
 
 module.exports = {
@@ -113,4 +145,5 @@ module.exports = {
   updateRuleStatusService,
   getRuleByIdService,
   updateRuleByIdService,
+  deleteRuleByIdService,
 };

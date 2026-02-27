@@ -424,6 +424,64 @@ const resetPasswordService = async (token, newPassword) => {
   }
 };
 
+const extensionLoginService = async (email, password) => {
+  logger.info("Processing extension login request", { email });
+  if (!email || !password) {
+    throw new AppError("Email and password are required", 400);
+  }
+  
+  const user = await User.find(
+    { email },
+    "email name role userId password id userName isEmailVerified isActive"
+  );
+  if (user.length === 0) {
+    throw new AppError("User not found with this email", 404);
+  }
+  
+  if (user.length > 1) {
+    throw new AppError("Multiple users found with the same email", 409);
+  }
+  
+  const isPasswordValid = await bcrypt.compare(
+    password?.toString(),
+    user[0].password
+  );
+  if (!isPasswordValid) {
+    throw new AppError("Invalid password", 401);
+  }
+
+  if (!user[0].isEmailVerified) {
+    logger.info(
+      "Unverified user attempting extension login",
+      {
+        email,
+        userId: user[0].userId,
+      }
+    );
+
+    throw new AppError(
+      "Please verify your email before logging in to the extension.",
+      403,
+      null,
+      { requiresEmailVerification: true, email }
+    );
+  }
+
+  const { name, role, userId, userName, _id } = user[0] || {};
+  logger.info("Extension login completed", { email, userId });
+  
+  const token = generateUserJwtToken(user[0], "180d", "extension");
+  return {
+    token,
+    email,
+    name,
+    role,
+    userId,
+    userName,
+    _id,
+  };
+};
+
 module.exports = {
   registerUserService,
   loginUserService,
@@ -431,4 +489,5 @@ module.exports = {
   verifyEmailService,
   forgotPasswordService,
   resetPasswordService,
+  extensionLoginService,
 };
