@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Box,
   CircularProgress,
@@ -19,16 +19,16 @@ import {
   HStack,
   IconButton,
 } from "@chakra-ui/react";
-import { FiSearch, FiUser, FiCalendar } from "react-icons/fi";
+import { FiSearch, FiUser, FiCalendar, FiTrash2 } from "react-icons/fi";
 import {
-  FETCH_RULES_ENDPOINT,
   UPDATE_RULE_STATUS_ENDPOINT,
 } from "../../utils/apiEndpoints";
-import ApiRequestUtils from "../../utils/apiRequestUtils";
+import ApiRequestUtils, { deleteRuleByIdAPI, fetchRulesAPI } from "../../utils/apiRequestUtils";
 import { RULE_DASHBOARD_COLUMNS } from "./dashboard.config";
 import { useNavigate, Link } from "react-router";
 import Pagination from "../../components/Pagination";
 import { AddIcon } from "@chakra-ui/icons";
+import { debounce } from "lodash";
 
 const BTN_STATE = {
   ALL: "all",
@@ -46,24 +46,23 @@ const Dashboard = () => {
   const [rules, setRules] = useState([]);
   const [totalRules, setTotalRules] = useState(0);
   const [activeBtn, setActiveBtn] = useState(BTN_STATE.ALL); // "all", "active", "inactive"
+  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await ApiRequestUtils.get(
-          FETCH_RULES_ENDPOINT(pagination.currentPage, pagination.pageSize, activeBtn)
-        );
+        const response = await fetchRulesAPI(pagination.currentPage, pagination.pageSize, activeBtn, search);
         setRules(response.data?.data?.rules || []);
         setTotalRules(response.data?.data?.totalCount || 0);
-        const paginationCopy = {
-          ...pagination,
+        setPagination((prev) => ({
+          ...prev,
           totalPages: Math.ceil(
-            (response.data?.data?.totalCount || 1) / pagination.pageSize
+            (response.data?.data?.totalCount || 1) / prev.pageSize
           ),
-        };
-        setPagination(paginationCopy);
+        }));
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -71,7 +70,7 @@ const Dashboard = () => {
       }
     };
     fetchData();
-  }, [pagination.currentPage, activeBtn]);
+  }, [pagination.currentPage, pagination.pageSize, activeBtn, search]);
 
   const handleActiveToggle = async (ruleId, isActive) => {
     try {
@@ -87,6 +86,23 @@ const Dashboard = () => {
       setRules(updatedRules);
     } catch (error) {
       console.error("Error updating rule status:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (ruleId) => {
+    if (!window.confirm("Are you sure you want to delete this rule?")) {
+      return;
+    }
+    try {
+      setLoading(true);
+      await deleteRuleByIdAPI(ruleId);
+      const updatedRules = rules.filter((r) => r.ruleId !== ruleId);
+      setRules(updatedRules);
+      setTotalRules((prev) => prev - 1);
+    } catch (error) {
+      console.error("Error deleting rule:", error);
     } finally {
       setLoading(false);
     }
@@ -122,6 +138,20 @@ const Dashboard = () => {
       },
     };
   };
+
+  const debouncedSetSearch = useMemo(
+    () => debounce((value) => {
+      setSearch(value);
+      setPagination((prev) => ({ ...prev, currentPage: 1 }));
+    }, 500),
+    []
+  );
+
+  const handleSearch = useCallback((e) => {
+    const value = e.target.value;
+    setSearchInput(value);
+    debouncedSetSearch(value);
+  }, [debouncedSetSearch]);
 
   return (
     <Box p={6}>
@@ -161,6 +191,8 @@ const Dashboard = () => {
                 placeholder="Search rules by name or description..."
                 bg="brand.topSurface"
                 color="white"
+                value={searchInput}
+                onChange={handleSearch}
               />
             </Box>
             <Button {...getBtnProps(BTN_STATE.ALL)}>All</Button>
@@ -252,8 +284,10 @@ const Dashboard = () => {
                       <Td>
                         <IconButton
                           variant="ghost"
-                          icon={<Text>...</Text>}
-                          aria-label="More actions"
+                          icon={<Icon as={FiTrash2} />}
+                          aria-label="Delete rule"
+                          colorScheme="red"
+                          onClick={() => handleDelete(ruleId)}
                         />
                       </Td>
                     </Tr>
