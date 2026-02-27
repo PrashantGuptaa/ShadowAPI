@@ -81,6 +81,7 @@ import {
   FETCH_ACTIVE_RULES_ENDPOINT,
   FETCH_RULE_DETAILS_BY_ID_ENDPOINT,
   UPDATE_RULE_BY_ID_ENPOINT,
+  DELETE_RULE_BY_ID_ENDPOINT,
 } from "./apiEndpoints";
 
 // User Management APIs
@@ -113,8 +114,8 @@ export const saveRuleAPI = (data) => {
   return apiRequestUtils.post(SAVE_RULE_ENDPOINT, data);
 };
 
-export const fetchRulesAPI = (pageNum, pageSize, type) => {
-  return apiRequestUtils.get(FETCH_RULES_ENDPOINT(pageNum, pageSize, type));
+export const fetchRulesAPI = (pageNum, pageSize, type, search) => {
+  return apiRequestUtils.get(FETCH_RULES_ENDPOINT(pageNum, pageSize, type, search));
 };
 
 export const updateRuleStatusAPI = (data) => {
@@ -131,6 +132,10 @@ export const fetchRuleDetailsByIdAPI = (ruleId) => {
 
 export const updateRuleByIdAPI = (ruleId, data) => {
   return apiRequestUtils.put(UPDATE_RULE_BY_ID_ENPOINT(ruleId), data);
+};
+
+export const deleteRuleByIdAPI = (ruleId) => {
+  return apiRequestUtils.put(DELETE_RULE_BY_ID_ENDPOINT(ruleId));
 };
 
 export default apiRequestUtils;

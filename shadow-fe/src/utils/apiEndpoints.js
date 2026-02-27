@@ -13,8 +13,8 @@ export const GOOGLE_AUTH_ENDPOINT = `${API_BASE_URL}auth/google`;
 export const GOOGLE_CALLBACK_ENDPOINT = `${API_BASE_URL}auth/google/callback`;
 
 // Rule Management Endpoints
-export const FETCH_RULES_ENDPOINT = (pageNum, pageSize, type) =>
-  `${API_BASE_URL}rule/collection?pageNum=${pageNum}&pageSize=${pageSize}&type=${type}`;
+export const FETCH_RULES_ENDPOINT = (pageNum, pageSize, type, search) =>
+  `${API_BASE_URL}rule/collection?pageNum=${pageNum}&pageSize=${pageSize}&type=${type}&search=${search}`;
 export const SAVE_RULE_ENDPOINT = `${API_BASE_URL}rule/create`;
 export const UPDATE_RULE_STATUS_ENDPOINT = `${API_BASE_URL}rule/update-status`;
 export const FETCH_ACTIVE_RULES_ENDPOINT = `${API_BASE_URL}rule/active-rules`;
@@ -22,3 +22,5 @@ export const FETCH_RULE_DETAILS_BY_ID_ENDPOINT = (ruleId) =>
   `${API_BASE_URL}rule/${ruleId}`;
 export const UPDATE_RULE_BY_ID_ENPOINT = (ruleId) =>
   `${API_BASE_URL}rule/update/${ruleId}`;
+export const DELETE_RULE_BY_ID_ENDPOINT = (ruleId) =>
+  `${API_BASE_URL}rule/delete/${ruleId}`;
