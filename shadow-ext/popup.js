@@ -16,6 +16,7 @@ function initializePopup() {
     password: document.getElementById("password"),
     toggleBtn: document.getElementById("toggle-extension"),
     openDashboardLink: document.getElementById("open-dashboard-link"),
+    logoutButton: document.getElementById("logout-link"),
   };
 
   // Set up the dashboard link
@@ -38,6 +39,9 @@ function initializePopup() {
   // Set up event listeners
   elements.loginButton.addEventListener("click", handleLogin);
   elements.toggleBtn.addEventListener("change", handleToggle);
+  if (elements.logoutButton) {
+    elements.logoutButton.addEventListener("click", handleLogout);
+  }
 
   // Helper functions
   function updateStatus(message) {
@@ -55,12 +59,14 @@ function initializePopup() {
       updateStatus("Please log in to use ShadowAPI");
       toggleVisibility(elements.loginForm, true);
       toggleVisibility(elements.toggleExtension, false);
+      toggleVisibility(elements.logoutButton, false);
       return;
     }
 
     updateStatus("Logged in");
     toggleVisibility(elements.loginForm, false);
     toggleVisibility(elements.toggleExtension, true);
+    toggleVisibility(elements.logoutButton, true);
   }
 
   async function initializeToggleButton() {
@@ -88,7 +94,7 @@ function initializePopup() {
     updateStatus("Logging in...");
 
     try {
-      const res = await fetch(`${CONFIG.API_URL}/user/login`, {
+      const res = await fetch(`${CONFIG.API_URL}/user/extension-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -110,6 +116,7 @@ function initializePopup() {
       await storage.set({ authToken });
       toggleVisibility(elements.loginForm, false);
       toggleVisibility(elements.toggleExtension, true);
+      toggleVisibility(elements.logoutButton, true);
       updateStatus("Logged in");
     } catch (error) {
       console.error("Error during login:", error);
@@ -117,73 +124,49 @@ function initializePopup() {
     }
   }
 
+  async function handleLogout() {
+    const confirmed = confirm("Are you sure you want to logout? You'll need to sign in again.");
+    if (!confirmed) return;
+
+    await storage.clear();
+    updateStatus("Logged out successfully");
+    toggleVisibility(elements.loginForm, true);
+    toggleVisibility(elements.toggleExtension, false);
+    toggleVisibility(elements.logoutButton, false);
+    updateToggleButton(false);
+  }
+
   async function handleToggle(e) {
     const isEnabled = e.target.checked;
     console.log("[ShadowAPI] Toggle button clicked", isEnabled);
     
-    await storage.set({ enabled: isEnabled });
     updateToggleButton(isEnabled);
     console.log(`[ShadowAPI] Extension ${isEnabled ? "enabled" : "disabled"}`);
     
-    if (isEnabled) {
-      fetchAndStoreRules();
-    } else {
-      await storage.remove("rules");
-    }
-  }
-
-  async function fetchAndStoreRules() {
-    try {
-      console.log("[ShadowAPI] Fetching rules from server...");
-      const { authToken } = await storage.get("authToken");
-      if (!authToken) {
-        console.warn("[ShadowAPI] No auth token found. Skipping rule fetch.");
-        await storage.clear();
-        return;
+    // Let background.js handle the business logic
+    chrome.runtime.sendMessage(
+      { type: "TOGGLE_EXTENSION", enabled: isEnabled },
+      (response) => {
+        if (response?.success) {
+          console.log(`[ShadowAPI] Rules fetched: ${response.rulesCount}`);
+          updateStatus(`Extension enabled (${response.rulesCount} rules loaded)`);
+          
+          // Inject into current tab
+          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs[0]?.id) {
+              chrome.runtime.sendMessage({
+                type: "INJECT_INTO_TAB",
+                tabId: tabs[0].id
+              });
+            }
+          });
+        } else if (response?.status === "disabled_and_rules_cleared") {
+          updateStatus("Extension disabled");
+        } else {
+          console.error("[ShadowAPI] Failed to fetch rules");
+          updateStatus("Failed to load rules");
+        }
       }
-
-      const { enabled } = await storage.get("enabled");
-      if (!enabled) {
-        console.log("[ShadowAPI] Extension disabled by user");
-        await storage.remove("rules");
-        return;
-      }
-
-      const res = await fetch(`${CONFIG.API_URL}/rule/active-rules`, {
-        headers: {
-          "auth-token": authToken,
-          "Content-Type": "application/json",
-        },
-      });
-      
-      if (res.status !== 200) {
-        await storage.clear();
-        return;
-      }
-
-      const result = await res.json();
-      const rules = result?.data || [];
-      await storage.set({ rules });
-      console.log("[ShadowAPI] Rules saved:", rules.length);
-      
-      injectContentScript();
-    } catch (e) {
-      console.error("[ShadowAPI] Failed to fetch rules:", e);
-      await storage.clear();
-    }
-  }
-
-  function injectContentScript() {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const tab = tabs[0];
-      if (!tab?.id || tab.url.startsWith("chrome://")) return;
-
-      chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ["content.js"]
-      }, () => {
-        chrome.tabs.sendMessage(tab.id, { type: "INJECT_SCRIPT" });
-      });
-    });
+    );
   }
 }

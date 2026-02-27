@@ -33,7 +33,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["injectedFetch.js"],
+      "resources": ["injectedFetch.js", "config.js"],
       "matches": ["<all_urls>"]
     }
   ]

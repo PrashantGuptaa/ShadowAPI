@@ -101,6 +101,19 @@
             input:checked+.slider:before {
                   transform: translateX(20px);
             }
+
+            #logout-link {
+                  color: #888;
+                  font-size: 11px;
+                  cursor: pointer;
+                  text-decoration: none;
+                  margin-top: 10px;
+            }
+
+            #logout-link:hover {
+                  color: #e74c3c;
+                  text-decoration: underline;
+            }
       </style>
 </head>
 
@@ -108,8 +121,8 @@
       <img src="assets/shadowGolden.png" alt="ShadowAPI Icon" width="120">
       <h2>ShadowAPI</h2>
       <div id="loginForm">
-            <input id="email" type="email" placeholder="Enter your email" required>
-            <input id="password" type="password" placeholder="Enter your password" required>
+            <input id="email" type="email" placeholder="Email" required>
+            <input id="password" type="password" placeholder="Password" required>
             <button class="ext-button" id="rule-login">Login</button>
       </div>
 
@@ -117,8 +130,6 @@
             <input type="checkbox" id="toggle-extension" checked="false" value="Enable" />
             <span class="slider"></span>
       </label>
-      <!-- <input class="ext-button" type="button" id="toggle-extension" value="Enable" style="transition: 0.5s;" /> -->
-
 
       <a id="open-dashboard-link" target="_blank" style="text-decoration: none; color: inherit; width: 100%;">
             <button class="ext-button" id="open-dashboard">
@@ -126,6 +137,7 @@
             </button>
       </a>
       <p id="status"></p>
+      <a id="logout-link" href="#">Log Out</a>
       <div id="extension-status"></div>
 
       <script type="module" src="popup.js"></script>
