@@ -2,13 +2,14 @@ const jwt = require("jsonwebtoken");
 const AppError = require("./appError");
 const logger = require("./logger");
 
-function generateUserJwtToken(user, expiresIn = "24h") {
+function generateUserJwtToken(user, expiresIn = "24h", scope = "full") {
   const payload = {
     _id: user._id,
     userId: user.userId,
     email: user.email,
     name: user.name,
-    picture: user.picture || null, // Optional field
+    picture: user.picture || null,
+    scope,
   };
 
   const privateKey = processKey(process.env.USER_SECRET_KEY, "private");
